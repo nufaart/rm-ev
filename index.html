@@ -133,8 +133,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
       padding: 0 4px;
     }
+    .hud-header span, .hud-header button { white-space: nowrap; }
     .hud-brand {
       display: flex;
       align-items: center;
@@ -182,6 +185,19 @@
       transition: all 0.2s;
     }
     .icon-chip:active { transform: scale(0.96); border-color: var(--cyan); color: #fff; }
+    .icon-chip.on { border-color: var(--cyan); color: #fff; background: rgba(6, 182, 212, 0.2); }
+    .mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 4px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #94a3b8;
+    }
+    .mode-row .icon-chip { flex: 1; text-align: center; }
 
     .hud-gauge {
       position: relative;
@@ -455,6 +471,13 @@
     <input type="range" id="manualTilt" min="-25" max="25" step="1" value="0">
   </div>
 
+  <!-- Pilihan suara cruising (salah satu, tidak dicampur) -->
+  <div class="mode-row">
+    <span>SUARA CRUISING</span>
+    <button class="icon-chip mode-btn" data-mode="cruise">CRUISING</button>
+    <button class="icon-chip mode-btn" data-mode="accel">AKSELERASI</button>
+  </div>
+
   <!-- Main Ignition Action -->
   <button class="ignition-btn" id="btnEngine">
     <span style="font-size:16px;">⚡</span> START ENGINE
@@ -554,6 +577,7 @@
   let runPeak = 0, runPeakT = 0, runMin = 0, runMinT = 0;
   let brakeLatched = false;
   let bandIdx = 0;
+  let cruiseMode = 'cruise'; // 'cruise' | 'accel' (salah satu, tidak dicampur)
 
   function makeDistortionCurve(amount = 22) {
     const k = amount;
@@ -676,6 +700,7 @@
     stateBadge.className = 'hud-state';
 
     let freq, master, lp, noise, load;
+    let harm = 1.5;
     if (state === 'IDLE') {
       freq = 38; master = 0.10; lp = 260; noise = 0.01; load = 20;
       stateBadge.classList.add('state-idle');
@@ -684,9 +709,17 @@
     } else if (state === 'CRUISE') {
       // Nada tetap di klaster ini; hanya volume yang naik-turun halus mengikuti kecepatan
       freq = band.f;
-      master = band.v + inBand * 0.08;
-      lp = 500 + bandIdx * 250 + inBand * 200;
-      noise = 0.02;
+      if (cruiseMode === 'accel') {
+        // Karakter akselerasi: harmonik lebih tinggi, lebih terang, sedikit lebih keras
+        harm = 2.0;
+        master = band.v + inBand * 0.08 + 0.06;
+        lp = 1200 + bandIdx * 250 + inBand * 200;
+        noise = 0.04;
+      } else {
+        master = band.v + inBand * 0.08;
+        lp = 500 + bandIdx * 250 + inBand * 200;
+        noise = 0.02;
+      }
       load = Math.round(45 + norm * 40);
       stateBadge.classList.add('state-cruise');
       stateBadge.innerText = `CRUISING ${band.min}-${band.max} KM/H`;
@@ -699,7 +732,7 @@
     }
 
     oscMain.frequency.setTargetAtTime(freq, t, 0.35);
-    oscHarmonic.frequency.setTargetAtTime(freq * 1.5, t, 0.35);
+    oscHarmonic.frequency.setTargetAtTime(freq * harm, t, 0.35);
     oscSub.frequency.setTargetAtTime(freq * 0.5, t, 0.35);
     mainGainNode.gain.setTargetAtTime(master, t, 0.4);
     filterLowPass.frequency.setTargetAtTime(lp, t, 0.3);
@@ -771,6 +804,16 @@
         ? window.Capacitor.Plugins[name] : null;
     } catch (e) { return null; }
   }
+
+  function setCruiseMode(mode) {
+    cruiseMode = mode === 'accel' ? 'accel' : 'cruise';
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === cruiseMode));
+    try { localStorage.setItem('rmev_cruise_mode', cruiseMode); } catch (e) {}
+  }
+  document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setCruiseMode(b.dataset.mode)));
+  let savedMode = 'cruise';
+  try { savedMode = localStorage.getItem('rmev_cruise_mode') || 'cruise'; } catch (e) {}
+  setCruiseMode(savedMode);
 
   const btnEngine = document.getElementById('btnEngine');
   btnEngine.addEventListener('click', () => {

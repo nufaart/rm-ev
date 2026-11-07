@@ -426,7 +426,7 @@
     <div class="hud-brand">
       <span class="status-dot" id="gpsDot"></span>
       <span id="gpsLabel">GPS READY</span>
-      <span class="version-tag">v3.4</span>
+      <span class="version-tag">v3.5</span>
     </div>
     <div class="header-actions">
       <button class="icon-chip" id="btnTare">TARE STANG</button>
@@ -444,7 +444,7 @@
     </svg>
     <div class="speed-wrapper">
       <div class="speed-val" id="speedDisp">0</div>
-      <div class="speed-unit">KM/H • MAX 40</div>
+      <div class="speed-unit">KM/H • MAX 120</div>
     </div>
     <div class="hud-state state-idle" id="stateBadge">IDLE STANDBY</div>
   </div>
@@ -484,7 +484,7 @@
       <span>Manual Speed: <b id="manualVal">0</b> km/h</span>
       <span>Tilt: <b id="tiltVal">0°</b></span>
     </div>
-    <input type="range" id="manualSlider" min="0" max="40" step="0.5" value="0">
+    <input type="range" id="manualSlider" min="0" max="120" step="0.5" value="0">
     <input type="range" id="manualTilt" min="-25" max="25" step="1" value="0">
   </div>
 
@@ -504,7 +504,7 @@
 <!-- Bottom Version Footer -->
 <div class="hud-footer">
   <span>CYBER EV SOUND SYNTHESIZER</span>
-  <span>BUILD v3.4.0 • 2026</span>
+  <span>BUILD v3.5.0 • 2026</span>
 </div>
 
 <script>
@@ -579,15 +579,20 @@
     { min: 10, max: 30, f: 55.00,  v: 0.16 },   // A1
     { min: 30, max: 45, f: 73.42,  v: 0.22 },   // D2
     { min: 45, max: 60, f: 98.00,  v: 0.28 },   // G2
-    { min: 60, max: 80, f: 130.81, v: 0.34 }    // C3
+    { min: 60, max: 80, f: 130.81, v: 0.34 },   // C3
+    { min: 80, max: 100, f: 146.83, v: 0.38 },  // D3
+    { min: 100, max: 120, f: 174.61, v: 0.42 }  // F3
   ];
+  const GAUGE_MAX = 120;        // skala gauge (km/jam)
+  const MAX_SPEED_KMH = 150;    // batas aman pembacaan GPS
+  const ACCEL_OVER_KMH = 40;    // di atas ini suara otomatis AKSELERASI
   const BAND_HYST = 2;          // histeresis batas klaster (km/jam) agar tidak bolak-balik
   // ===== ENGINE BRAKE: penurunan besar DAN cukup lama =====
   const BRAKE_DROP_KMH = 10;    // total penurunan minimal
   const BRAKE_MIN_MS = 1500;    // penurunan harus berlangsung minimal 1,5 detik
   const BRAKE_STALL_MS = 800;   // dianggap berhenti turun jika tidak ada titik terendah baru selama 0,8 detik
   const BRAKE_BOUNCE_KMH = 1.5; // naik lagi lebih dari ini => ulang pengukuran
-  const APP_VERSION = '3.4.0';
+  const APP_VERSION = '3.5.0';
   const VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
   const RELEASE_URL = 'https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk';
 
@@ -716,7 +721,7 @@
   function updateSound(speed) {
     if (!audioCtx || !isEngineRunning) return;
     const t = audioCtx.currentTime;
-    const norm = Math.min(Math.max(speed / 40, 0), 1);
+    const norm = Math.min(Math.max(speed / GAUGE_MAX, 0), 1);
     const state = detectState(speed, performance.now());
     bandIdx = bandFor(speed);
     const band = CRUISE_BANDS[bandIdx];
@@ -738,7 +743,8 @@
     } else if (state === 'CRUISE') {
       // Nada tetap di klaster ini; hanya volume yang naik-turun halus mengikuti kecepatan
       freq = band.f * mp.freq;
-      if (cruiseMode === 'accel') {
+      const accelNow = cruiseMode === 'accel' || speed > ACCEL_OVER_KMH;
+      if (accelNow) {
         // Karakter akselerasi: harmonik lebih tinggi, lebih terang, sedikit lebih keras
         harm = mp.harm * 1.33;
         master = (band.v + inBand * 0.08 + 0.06) * mp.gain;
@@ -751,8 +757,8 @@
         noise = 0.02 * mp.noise;
       }
       load = Math.round(45 + norm * 40);
-      stateBadge.classList.add('state-cruise');
-      stateBadge.innerText = `CRUISING ${band.min}-${band.max} KM/H`;
+      stateBadge.classList.add(accelNow ? 'state-accel' : 'state-cruise');
+      stateBadge.innerText = accelNow ? `⚡ AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${band.min}-${band.max} KM/H`;
       gaugeFill.style.stroke = 'var(--green)';
     } else {
       freq = band.f * mp.freq * 0.8; master = 0.30 * mp.gain; lp = 260 * mp.lp; noise = 0.10 * mp.noise; load = 25;
@@ -804,7 +810,7 @@
           document.getElementById('gpsDot').className = 'status-dot active';
           document.getElementById('gpsLabel').innerText = 'GPS LOCKED';
           let speedKmh = (pos.coords.speed !== null && pos.coords.speed >= 0) ? pos.coords.speed * 3.6 : 0;
-          if (!isTestMode) targetSpeed = Math.min(speedKmh, 40);
+          if (!isTestMode) targetSpeed = Math.min(speedKmh, MAX_SPEED_KMH);
         },
         () => {
           document.getElementById('gpsDot').className = 'status-dot warn';

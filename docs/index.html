@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unduh CYBER EV ENGINE - APK Android</title>
+  <meta name="description" content="Unduh aplikasi CYBER EV ENGINE (HUD kecepatan dan suara engine) untuk Android.">
+  <meta name="theme-color" content="#030712">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='28' fill='%23030712'/><circle cx='64' cy='64' r='46' fill='none' stroke='rgba(6,182,212,0.2)' stroke-width='6'/><path d='M26 84 A 44 44 0 0 1 102 84' fill='none' stroke='%2306b6d4' stroke-width='8' stroke-linecap='round'/><path d='M64 28 L64 64 L86 64' stroke='%23ef4444' stroke-width='6' stroke-linecap='round'/></svg>">
+  <style>
+    :root {
+      --bg: #030712;
+      --panel: rgba(15, 23, 42, 0.75);
+      --border: rgba(56, 189, 248, 0.18);
+      --cyan: #06b6d4;
+      --red: #ef4444;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); }
+    body {
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6, 182, 212, 0.18), transparent),
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      padding: 0 16px 40px;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 1.5px; font-size: 13px; color: var(--muted); }
+    .brand svg { width: 28px; height: 28px; }
+    .tag { font-size: 10px; font-weight: 800; color: var(--cyan); background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.3); padding: 3px 8px; border-radius: 6px; }
+
+    .hero {
+      text-align: center;
+      padding: 36px 22px 30px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), rgba(3,7,18,0.95));
+      box-shadow: 0 16px 40px -10px rgba(0,0,0,0.8), inset 0 0 30px rgba(6,182,212,0.05);
+    }
+    h1 { font-size: 26px; letter-spacing: 1px; font-weight: 900; }
+    .lead { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 10px auto 22px; max-width: 480px; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #030712;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      box-shadow: 0 10px 30px -8px rgba(6,182,212,0.6);
+    }
+    .btn:active { transform: scale(0.98); }
+    .meta { margin-top: 16px; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: center; }
+    .meta b { color: var(--text); }
+
+    section { margin-top: 18px; background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 20px 22px; }
+    h2 { font-size: 13px; letter-spacing: 1.5px; color: var(--cyan); text-transform: uppercase; margin-bottom: 12px; }
+    ol, ul { padding-left: 20px; color: #cbd5e1; font-size: 14px; line-height: 1.7; }
+    li + li { margin-top: 4px; }
+    .feat { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .feat div { background: rgba(3,7,18,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+    .feat b { color: var(--text); display: block; margin-bottom: 2px; font-size: 14px; }
+    .notes { white-space: pre-wrap; font-size: 13px; color: #cbd5e1; line-height: 1.6; background: rgba(3,7,18,0.6); border-radius: 12px; padding: 12px 14px; max-height: 260px; overflow: auto; }
+    .warn { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
+    footer { text-align: center; margin-top: 26px; font-size: 12px; color: var(--muted); }
+    footer a { color: var(--cyan); text-decoration: none; }
+    @media (min-width: 640px) { .feat { grid-template-columns: 1fr 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 128 128" aria-hidden="true"><circle cx="64" cy="64" r="46" fill="none" stroke="rgba(6,182,212,0.25)" stroke-width="6"/><path d="M26 84 A 44 44 0 0 1 102 84" fill="none" stroke="#06b6d4" stroke-width="8" stroke-linecap="round"/><path d="M64 28 L64 64 L86 64" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/></svg>
+      CYBER EV ENGINE
+    </div>
+    <span class="tag" id="verTag">v—</span>
+  </header>
+
+  <div class="hero">
+    <h1>HUD Kecepatan &amp; Suara Engine</h1>
+    <p class="lead">Aplikasi Android untuk motor EV Anda: kecepatan dari GPS, suara cruising yang stabil per rentang kecepatan, suara akselerasi di atas 40 km/jam, dan engine brake saat turun kecepatan besar. Bisa tetap berjalan di latar belakang.</p>
+    <a class="btn" id="dlBtn" href="https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk">Unduh APK</a>
+    <div class="meta">
+      <span>Versi: <b id="verTxt">—</b></span>
+      <span>Ukuran: <b id="sizeTxt">—</b></span>
+      <span>Rilis: <b id="dateTxt">—</b></span>
+      <span>Android 7.0+</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>Cara memasang</h2>
+    <ol>
+      <li>Tekan <b>Unduh APK</b> di atas, lalu tunggu unduhan selesai.</li>
+      <li>Buka file <b>rm-ev.apk</b> dari notifikasi unduhan atau folder Download.</li>
+      <li>Jika diminta, izinkan <b>Pasang aplikasi dari sumber ini</b> untuk browser Anda.</li>
+      <li>Buka <b>CYBER EV ENGINE</b>, izinkan akses <b>lokasi</b> dan <b>notifikasi</b>.</li>
+      <li>Tekan <b>START ENGINE</b>. Notifikasi "Engine aktif" akan muncul saat app berjalan di latar belakang.</li>
+    </ol>
+    <p class="warn">APK ini dibagikan langsung, bukan dari Play Store, jadi Android akan menampilkan peringatan saat pemasangan. Unduh hanya dari halaman ini.</p>
+  </section>
+
+  <section>
+    <h2>Fitur</h2>
+    <div class="feat">
+      <div><b>Suara 3 mode</b>IDLE saat diam, CRUISING stabil per rentang kecepatan, dan ENGINE BRAKE saat turun kecepatan besar.</div>
+      <div><b>Akselerasi di atas 40 km/jam</b>Suara otomatis berubah ke akselerasi saat melewati 40 km/jam.</div>
+      <div><b>Cruising atau Akselerasi</b>Pilih karakter suara cruising untuk kecepatan di bawah 40 km/jam.</div>
+      <div><b>Jenis motor</b>Pilih karakter knalpot: Inline-4, R1 Crossplane, 2-Tak, Matic, Single, atau Harley V-Twin.</div>
+      <div><b>Cek update</b>Tombol CEK UPDATE di aplikasi memeriksa versi terbaru.</div>
+      <div><b>Background</b>Engine tetap jalan dengan notifikasi saat layar mati.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Catatan rilis terbaru</h2>
+    <div class="notes" id="notes">Memuat catatan rilis…</div>
+  </section>
+
+  <footer>
+    <a href="https://github.com/nufaart/rm-ev">Kode sumber</a> ·
+    <a href="https://github.com/nufaart/rm-ev/releases">Semua versi</a>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var API = 'https://api.github.com/repos/nufaart/rm-ev/releases/latest';
+    var VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
+
+    function fmtSize(bytes) { return bytes ? (bytes / 1048576).toFixed(1) + ' MB' : '—'; }
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d) ? '—' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    fetch(API, { headers: { Accept: 'application/vnd.github+json' } })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (rel) {
+        var tag = (rel.tag_name || '').replace(/^v/, '');
+        document.getElementById('verTxt').textContent = tag || '—';
+        document.getElementById('verTag').textContent = 'v' + tag;
+        document.getElementById('dateTxt').textContent = fmtDate(rel.published_at);
+        var apk = (rel.assets || []).filter(function (a) { return a.name === 'rm-ev.apk'; })[0];
+        if (apk) {
+          document.getElementById('sizeTxt').textContent = fmtSize(apk.size);
+          document.getElementById('dlBtn').href = apk.browser_download_url;
+        }
+        document.getElementById('notes').textContent = rel.body || 'Belum ada catatan rilis.';
+      })
+      .catch(function () {
+        document.getElementById('notes').textContent = 'Catatan rilis tidak bisa dimuat sekarang. Lihat halaman rilis di GitHub.';
+      });
+
+    // Versi dari version.json sebagai cadangan jika API tidak bisa diakses
+    fetch(VERSION_URL, { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (info) {
+        var v = info.version || '';
+        if (document.getElementById('verTxt').textContent === '—') {
+          document.getElementById('verTxt').textContent = v;
+          document.getElementById('verTag').textContent = 'v' + v;
+        }
+      })
+      .catch(function () {});
+  })();
+</script>
+</body>
+</html>

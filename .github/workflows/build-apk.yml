@@ -1,9 +1,8 @@
-name: Build APK
+name: Build APK & Release
 
 on:
   push:
     branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -46,8 +45,18 @@ jobs:
           name: rm-ev-apk
           path: rm-ev.apk
 
-      - name: Rilis ke GitHub Releases (hanya saat tag v*)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: rm-ev.apk
+      - name: Buat atau perbarui GitHub Release (tag vX.Y.Z dari version.json)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./version.json').version")
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" rm-ev.apk --clobber
+            gh release edit "$TAG" --latest
+          else
+            gh release create "$TAG" rm-ev.apk \
+              --title "CYBER EV ENGINE $TAG" \
+              --generate-notes \
+              --latest
+          fi

@@ -461,6 +461,23 @@
     </div>
   </div>
 
+  <!-- Pilihan jenis motor (karakter suara; 3 mode suara tetap) -->
+  <div class="preset-selector">
+    <div class="preset-header">
+      <span>JENIS MOTOR</span>
+      <span id="presetCategory" style="color:var(--cyan)">INLINE-4</span>
+    </div>
+    <select id="exhaustPreset">
+      <option value="superbike" selected>🔥 Inline-4 1000cc Screamer (Moge)</option>
+      <option value="crossplane">⚡ R1 Crossplane Big-Bang (Galak)</option>
+      <option value="twostroke_race">💨 2-Tak 150cc Kalajengking Garing</option>
+      <option value="beatmberr">💥 Matic Beat Mberr Bobokan</option>
+      <option value="single_thump">🚜 Single Cylinder 400cc Thumper</option>
+      <option value="harley_vtwin">🦅 Harley V-Twin 1800cc (Potato)</option>
+      <option value="matic_std">🛵 Skutik Matic Standar CVT</option>
+    </select>
+  </div>
+
   <!-- Test Mode Drawer -->
   <div class="manual-test-box" id="testBox">
     <div style="display:flex; justify-content:space-between;">
@@ -577,6 +594,17 @@
   let runPeak = 0, runPeakT = 0, runMin = 0, runMinT = 0;
   let brakeLatched = false;
   let bandIdx = 0;
+  // Karakter tiap jenis motor: pengali nada, harmonik, filter, dan volume (3 mode suara tetap)
+  const MOTOR_PRESETS = {
+    superbike:      { freq: 1.00, harm: 2.00,  lp: 1.00, gain: 1.00, noise: 1.0 },
+    crossplane:     { freq: 1.05, harm: 1.414, lp: 0.95, gain: 1.00, noise: 1.0 },
+    twostroke_race: { freq: 1.30, harm: 2.02,  lp: 1.40, gain: 1.05, noise: 1.6 },
+    beatmberr:      { freq: 0.90, harm: 1.50,  lp: 0.80, gain: 0.95, noise: 1.2 },
+    single_thump:   { freq: 0.75, harm: 1.33,  lp: 0.70, gain: 1.05, noise: 0.9 },
+    harley_vtwin:   { freq: 0.60, harm: 1.25,  lp: 0.60, gain: 1.10, noise: 0.8 },
+    matic_std:      { freq: 0.85, harm: 1.50,  lp: 0.60, gain: 0.85, noise: 0.7 }
+  };
+  let motorPreset = MOTOR_PRESETS.superbike;
   let cruiseMode = 'cruise'; // 'cruise' | 'accel' (salah satu, tidak dicampur)
 
   function makeDistortionCurve(amount = 22) {
@@ -701,31 +729,33 @@
 
     let freq, master, lp, noise, load;
     let harm = 1.5;
+    const mp = motorPreset;
     if (state === 'IDLE') {
-      freq = 38; master = 0.10; lp = 260; noise = 0.01; load = 20;
+      freq = 38 * mp.freq; master = 0.10 * mp.gain; lp = 260 * mp.lp; noise = 0.01 * mp.noise; load = 20;
       stateBadge.classList.add('state-idle');
       stateBadge.innerText = 'IDLE STANDBY';
       gaugeFill.style.stroke = 'var(--cyan)';
     } else if (state === 'CRUISE') {
       // Nada tetap di klaster ini; hanya volume yang naik-turun halus mengikuti kecepatan
-      freq = band.f;
+      freq = band.f * mp.freq;
       if (cruiseMode === 'accel') {
         // Karakter akselerasi: harmonik lebih tinggi, lebih terang, sedikit lebih keras
-        harm = 2.0;
-        master = band.v + inBand * 0.08 + 0.06;
-        lp = 1200 + bandIdx * 250 + inBand * 200;
-        noise = 0.04;
+        harm = mp.harm * 1.33;
+        master = (band.v + inBand * 0.08 + 0.06) * mp.gain;
+        lp = (1200 + bandIdx * 250 + inBand * 200) * mp.lp;
+        noise = 0.04 * mp.noise;
       } else {
-        master = band.v + inBand * 0.08;
-        lp = 500 + bandIdx * 250 + inBand * 200;
-        noise = 0.02;
+        harm = mp.harm;
+        master = (band.v + inBand * 0.08) * mp.gain;
+        lp = (500 + bandIdx * 250 + inBand * 200) * mp.lp;
+        noise = 0.02 * mp.noise;
       }
       load = Math.round(45 + norm * 40);
       stateBadge.classList.add('state-cruise');
       stateBadge.innerText = `CRUISING ${band.min}-${band.max} KM/H`;
       gaugeFill.style.stroke = 'var(--green)';
     } else {
-      freq = band.f * 0.8; master = 0.30; lp = 260; noise = 0.10; load = 25;
+      freq = band.f * mp.freq * 0.8; master = 0.30 * mp.gain; lp = 260 * mp.lp; noise = 0.10 * mp.noise; load = 25;
       stateBadge.classList.add('state-enginebrake');
       stateBadge.innerText = '⛔ ENGINE BRAKE';
       gaugeFill.style.stroke = 'var(--red)';
@@ -811,6 +841,19 @@
     try { localStorage.setItem('rmev_cruise_mode', cruiseMode); } catch (e) {}
   }
   document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setCruiseMode(b.dataset.mode)));
+  const motorSelect = document.getElementById('exhaustPreset');
+  function setMotor(key) {
+    motorPreset = MOTOR_PRESETS[key] || MOTOR_PRESETS.superbike;
+    motorSelect.value = MOTOR_PRESETS[key] ? key : 'superbike';
+    const label = motorSelect.options[motorSelect.selectedIndex].text.replace(/^\S+\s/, '');
+    document.getElementById('presetCategory').innerText = label.split(' ')[0].toUpperCase();
+    try { localStorage.setItem('rmev_motor', motorSelect.value); } catch (e) {}
+  }
+  motorSelect.addEventListener('change', () => setMotor(motorSelect.value));
+  let savedMotor = 'superbike';
+  try { savedMotor = localStorage.getItem('rmev_motor') || 'superbike'; } catch (e) {}
+  setMotor(savedMotor);
+
   let savedMode = 'cruise';
   try { savedMode = localStorage.getItem('rmev_cruise_mode') || 'cruise'; } catch (e) {}
   setCruiseMode(savedMode);

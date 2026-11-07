@@ -90,9 +90,10 @@
     .status-dot.active { background: var(--lime); box-shadow: 0 0 10px var(--lime); }
     .status-dot.warn { background: #ffb020; box-shadow: 0 0 10px #ffb020; }
     .round {
-      width: 40px; height: 40px; border-radius: 14px 6px 14px 6px;
+      height: 40px; min-width: 40px; padding: 0 12px; border-radius: 14px 6px 14px 6px;
       border: 1px solid var(--line); background: var(--glass); color: var(--cyan);
-      font-size: 16px; cursor: pointer; display: grid; place-items: center;
+      font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; font-weight: 600;
+      cursor: pointer; display: grid; place-items: center;
       transition: transform .2s, box-shadow .2s;
     }
     .round:active { transform: scale(.94); }
@@ -258,7 +259,7 @@
     </div>
     <div class="top-right">
       <div class="pill"><span class="status-dot" id="gpsDot"></span><span id="gpsLabel">GPS READY</span></div>
-      <button class="round" id="btnDrawer" aria-label="Buka panel kontrol">☰</button>
+      <button class="round" id="btnDrawer" aria-label="Buka panel kontrol">MENU</button>
     </div>
   </header>
 
@@ -271,7 +272,7 @@
       </svg>
       <div class="speed">
         <div class="speed-val" id="speedDisp">0</div>
-        <div class="speed-unit">KM/H · MAX 120</div>
+        <div class="speed-unit">KM/H  MAX 120</div>
       </div>
     </div>
     <div class="hud-state state-idle" id="stateBadge">IDLE STANDBY</div>
@@ -282,7 +283,7 @@
   </main>
 
   <footer class="dock">
-    <button class="start" id="btnEngine">⚡ START ENGINE</button>
+    <button class="start" id="btnEngine">START ENGINE</button>
   </footer>
 </div>
 
@@ -292,20 +293,20 @@
   <div class="grip" id="grip"></div>
   <div class="dhead">
     <h2>KONTROL</h2>
-    <button class="round" id="btnClose" aria-label="Tutup panel">✕</button>
+    <button class="round" id="btnClose" aria-label="Tutup panel">TUTUP</button>
   </div>
 
   <div class="cards">
     <section class="card" style="--i:0">
       <h3>JENIS MOTOR <em id="presetCategory">INLINE-4</em></h3>
       <select id="exhaustPreset">
-        <option value="superbike" selected>🔥 Inline-4 1000cc Screamer (Moge)</option>
-        <option value="crossplane">⚡ R1 Crossplane Big-Bang (Galak)</option>
-        <option value="twostroke_race">💨 2-Tak 150cc Kalajengking Garing</option>
-        <option value="beatmberr">💥 Matic Beat Mberr Bobokan</option>
-        <option value="single_thump">🚜 Single Cylinder 400cc Thumper</option>
-        <option value="harley_vtwin">🦅 Harley V-Twin 1800cc (Potato)</option>
-        <option value="matic_std">🛵 Skutik Matic Standar CVT</option>
+        <option value="superbike" selected>Inline-4 1000cc Screamer (Moge)</option>
+        <option value="crossplane">R1 Crossplane Big-Bang (Galak)</option>
+        <option value="twostroke_race">2-Tak 150cc Kalajengking Garing</option>
+        <option value="beatmberr">Matic Beat Mberr Bobokan</option>
+        <option value="single_thump">Single Cylinder 400cc Thumper</option>
+        <option value="harley_vtwin">Harley V-Twin 1800cc (Potato)</option>
+        <option value="matic_std">Skutik Matic Standar CVT</option>
       </select>
     </section>
 
@@ -346,7 +347,7 @@
     </section>
   </div>
 
-  <div class="dfoot">CYBER EV SOUND SYNTHESIZER · BUILD v3.6.0</div>
+  <div class="dfoot">CYBER EV SOUND SYNTHESIZER, BUILD v3.6.0</div>
 </aside>
 
 <script>
@@ -600,12 +601,12 @@
       }
       load = Math.round(45 + norm * 40);
       stateBadge.classList.add(accelNow ? 'state-accel' : 'state-cruise');
-      stateBadge.innerText = accelNow ? `⚡ AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${band.min}-${band.max} KM/H`;
+      stateBadge.innerText = accelNow ? `AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${band.min}-${band.max} KM/H`;
       gaugeFill.style.stroke = 'var(--green)';
     } else {
       freq = band.f * mp.freq * 0.8; master = 0.30 * mp.gain; lp = 260 * mp.lp; noise = 0.10 * mp.noise; load = 25;
       stateBadge.classList.add('state-enginebrake');
-      stateBadge.innerText = '⛔ ENGINE BRAKE';
+      stateBadge.innerText = 'ENGINE BRAKE';
       gaugeFill.style.stroke = 'var(--red)';
     }
 
@@ -713,7 +714,7 @@
       audioCtx.resume();
       isEngineRunning = true;
       resetDetector();
-      btnEngine.innerHTML = '<span style="font-size:16px;">⏹</span> SHUTDOWN REACTOR';
+      btnEngine.innerText = 'SHUTDOWN REACTOR';
       btnEngine.classList.add('active');
       startGPS();
       const keep = nativePlugin('KeepAlive');
@@ -725,7 +726,7 @@
       if (audioCtx) audioCtx.suspend();
       const keep = nativePlugin('KeepAlive');
       if (keep) keep.stop().catch(() => {});
-      btnEngine.innerHTML = '<span style="font-size:16px;">⚡</span> START ENGINE';
+      btnEngine.innerText = 'START ENGINE';
       btnEngine.classList.remove('active');
       document.getElementById('speedDisp').innerText = '0';
       document.getElementById('gaugeFill').style.strokeDashoffset = 283;

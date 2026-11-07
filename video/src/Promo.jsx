@@ -17,10 +17,10 @@ const sec = (s) => Math.round(s * FPS);
 // Tahap caption (detik) — mengikuti urutan di video/capture/capture.mjs
 const SCENES = [
   { from: 0, to: 3, kicker: 'CYBER EV ENGINE', title: 'HUD kecepatan & suara engine', sub: 'Untuk motor EV kamu' },
-  { from: 3, to: 10.5, kicker: '01 · CRUISING', title: 'Suara stabil per klaster', sub: 'Nada tetap di 10–30, 30–45, 45–60, 60–80 km/jam' },
-  { from: 10.5, to: 17, kicker: '02 · AKSELERASI', title: 'Di atas 40 km/jam', sub: 'Suara berubah otomatis ke akselerasi' },
-  { from: 17, to: 23, kicker: '03 · ENGINE BRAKE', title: 'Turun kecepatan besar', sub: 'Hanya saat turun ≥ 10 km/jam dan lebih dari 1,5 detik' },
-  { from: 23, to: 31, kicker: '04 · KONTROL', title: 'Pilih jenis motor', sub: 'Karakter knalpot dan mode suara dari drawer' },
+  { from: 3, to: 10.5, kicker: 'CRUISING', title: 'Suara stabil per klaster', sub: 'Nada tetap di 10-30, 30-45, 45-60, 60-80 km/jam' },
+  { from: 10.5, to: 17, kicker: 'AKSELERASI', title: 'Di atas 40 km/jam', sub: 'Suara berubah otomatis ke akselerasi' },
+  { from: 17, to: 23, kicker: 'ENGINE BRAKE', title: 'Turun kecepatan besar', sub: 'Hanya saat turun minimal 10 km/jam dan lebih dari 1,5 detik' },
+  { from: 23, to: 31, kicker: 'KONTROL', title: 'Pilih jenis motor', sub: 'Karakter knalpot dan mode suara dari drawer' },
 ];
 
 const Caption = ({ scene, durationFrames }) => {

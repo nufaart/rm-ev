@@ -410,7 +410,7 @@
     <div class="hud-brand">
       <span class="status-dot" id="gpsDot"></span>
       <span id="gpsLabel">GPS READY</span>
-      <span class="version-tag">v3.3</span>
+      <span class="version-tag">v3.4</span>
     </div>
     <div class="header-actions">
       <button class="icon-chip" id="btnTare">TARE STANG</button>
@@ -464,7 +464,7 @@
 <!-- Bottom Version Footer -->
 <div class="hud-footer">
   <span>CYBER EV SOUND SYNTHESIZER</span>
-  <span>BUILD v3.3.0 • 2026</span>
+  <span>BUILD v3.4.0 • 2026</span>
 </div>
 
 <script>
@@ -534,15 +534,26 @@
   let isTestMode = false;
 
   // ===== HANYA 3 SUARA: IDLE, CRUISE (volume naik halus mengikuti kecepatan), ENGINE BRAKE =====
-  const BRAKE_DROP_KMH = 10;    // penurunan minimal dalam jendela waktu => engine brake
-  const BRAKE_WINDOW_MS = 3000; // jendela waktu pengukuran penurunan
-  const BRAKE_RELEASE_KMH = 4;  // histeresis: keluar dari engine brake jika penurunan < 4
-  const APP_VERSION = '3.3.0';
+  // ===== KLASTER CRUISING: nada stabil per rentang kecepatan, hanya volume yang berubah halus =====
+  const CRUISE_BANDS = [
+    { min: 10, max: 30, f: 55.00,  v: 0.16 },   // A1
+    { min: 30, max: 45, f: 73.42,  v: 0.22 },   // D2
+    { min: 45, max: 60, f: 98.00,  v: 0.28 },   // G2
+    { min: 60, max: 80, f: 130.81, v: 0.34 }    // C3
+  ];
+  const BAND_HYST = 2;          // histeresis batas klaster (km/jam) agar tidak bolak-balik
+  // ===== ENGINE BRAKE: penurunan besar DAN cukup lama =====
+  const BRAKE_DROP_KMH = 10;    // total penurunan minimal
+  const BRAKE_MIN_MS = 1500;    // penurunan harus berlangsung minimal 1,5 detik
+  const BRAKE_STALL_MS = 800;   // dianggap berhenti turun jika tidak ada titik terendah baru selama 0,8 detik
+  const BRAKE_BOUNCE_KMH = 1.5; // naik lagi lebih dari ini => ulang pengukuran
+  const APP_VERSION = '3.4.0';
   const VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
   const RELEASE_URL = 'https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk';
 
-  let speedHistory = [];
+  let runPeak = 0, runPeakT = 0, runMin = 0, runMinT = 0;
   let brakeLatched = false;
+  let bandIdx = 0;
 
   function makeDistortionCurve(amount = 22) {
     const k = amount;
@@ -608,24 +619,45 @@
     noiseNode.start();
   }
 
-  // Tentukan state dari kecepatan. Engine brake hanya jika turun >= BRAKE_DROP_KMH dalam BRAKE_WINDOW_MS.
-  function detectState(speed, now) {
-    speedHistory.push({ t: now, v: speed });
-    while (speedHistory.length && now - speedHistory[0].t > BRAKE_WINDOW_MS) speedHistory.shift();
+  function resetDetector() {
+    runPeak = 0; runPeakT = 0; runMin = 0; runMinT = 0;
+    brakeLatched = false;
+    bandIdx = 0;
+  }
 
-    if (speed < 1.0) {
-      speedHistory = [];
+  // Klaster kecepatan dengan histeresis: pindah klaster hanya jika melewati batas + BAND_HYST
+  function bandFor(speed) {
+    let b = bandIdx;
+    while (b < CRUISE_BANDS.length - 1 && speed >= CRUISE_BANDS[b].max + BAND_HYST) b++;
+    while (b > 0 && speed < CRUISE_BANDS[b].min - BAND_HYST) b--;
+    return b;
+  }
+
+  // Engine brake hanya jika kecepatan turun >= BRAKE_DROP_KMH dan turunnya berlangsung >= BRAKE_MIN_MS.
+  // Penurunan kecil atau singkat hanya mengubah volume cruising.
+  function detectState(speed, now) {
+    if (speed < 1.0) { resetDetector(); return 'IDLE'; }
+
+    if (runPeakT === 0 || speed > runMin + BRAKE_BOUNCE_KMH) {
+      runPeak = speed; runPeakT = now; runMin = speed; runMinT = now;
       brakeLatched = false;
-      return 'IDLE';
+    } else if (speed > runPeak) {
+      runPeak = speed; runPeakT = now; runMin = speed; runMinT = now;
+      brakeLatched = false;
+    } else if (speed < runMin) {
+      runMin = speed; runMinT = now;
     }
 
-    let peak = speed;
-    for (const s of speedHistory) if (s.v > peak) peak = s.v;
-    const drop = peak - speed;
+    const drop = runPeak - speed;
+    const fallDuration = runMinT - runPeakT;
+    const stillFalling = (now - runMinT) < BRAKE_STALL_MS;
 
-    if (!brakeLatched && drop >= BRAKE_DROP_KMH) brakeLatched = true;
-    else if (brakeLatched && drop < BRAKE_RELEASE_KMH) brakeLatched = false;
-
+    if (!brakeLatched) {
+      if (drop >= BRAKE_DROP_KMH && fallDuration >= BRAKE_MIN_MS && stillFalling) brakeLatched = true;
+    } else if (!stillFalling) {
+      brakeLatched = false;
+      runPeak = speed; runPeakT = now; runMin = speed; runMinT = now;
+    }
     return brakeLatched ? 'ENGINE_BRAKE' : 'CRUISE';
   }
 
@@ -634,6 +666,9 @@
     const t = audioCtx.currentTime;
     const norm = Math.min(Math.max(speed / 40, 0), 1);
     const state = detectState(speed, performance.now());
+    bandIdx = bandFor(speed);
+    const band = CRUISE_BANDS[bandIdx];
+    const inBand = Math.min(Math.max((speed - band.min) / (band.max - band.min), 0), 1);
 
     const stateBadge = document.getElementById('stateBadge');
     const gaugeFill = document.getElementById('gaugeFill');
@@ -647,27 +682,27 @@
       stateBadge.innerText = 'IDLE STANDBY';
       gaugeFill.style.stroke = 'var(--cyan)';
     } else if (state === 'CRUISE') {
-      // Volume dan nada naik perlahan seiring kecepatan (smooth, tanpa lompatan)
-      freq = 48 + norm * 150;
-      master = 0.14 + norm * 0.36;
-      lp = 500 + norm * 1100;
+      // Nada tetap di klaster ini; hanya volume yang naik-turun halus mengikuti kecepatan
+      freq = band.f;
+      master = band.v + inBand * 0.08;
+      lp = 500 + bandIdx * 250 + inBand * 200;
       noise = 0.02;
       load = Math.round(45 + norm * 40);
       stateBadge.classList.add('state-cruise');
-      stateBadge.innerText = 'CRUISING STABLE';
+      stateBadge.innerText = `CRUISING ${band.min}-${band.max} KM/H`;
       gaugeFill.style.stroke = 'var(--green)';
     } else {
-      freq = 44 + norm * 110; master = 0.30; lp = 260 + norm * 180; noise = 0.10; load = 25;
+      freq = band.f * 0.8; master = 0.30; lp = 260; noise = 0.10; load = 25;
       stateBadge.classList.add('state-enginebrake');
       stateBadge.innerText = '⛔ ENGINE BRAKE';
       gaugeFill.style.stroke = 'var(--red)';
     }
 
-    oscMain.frequency.setTargetAtTime(freq, t, 0.12);
-    oscHarmonic.frequency.setTargetAtTime(freq * 1.5, t, 0.12);
-    oscSub.frequency.setTargetAtTime(freq * 0.5, t, 0.12);
+    oscMain.frequency.setTargetAtTime(freq, t, 0.35);
+    oscHarmonic.frequency.setTargetAtTime(freq * 1.5, t, 0.35);
+    oscSub.frequency.setTargetAtTime(freq * 0.5, t, 0.35);
     mainGainNode.gain.setTargetAtTime(master, t, 0.4);
-    filterLowPass.frequency.setTargetAtTime(lp, t, 0.2);
+    filterLowPass.frequency.setTargetAtTime(lp, t, 0.3);
     noiseGain.gain.setTargetAtTime(noise, t, 0.2);
 
     document.getElementById('loadDisp').innerText = `${load}%`;
@@ -743,8 +778,7 @@
       if (!audioCtx) initAudio();
       audioCtx.resume();
       isEngineRunning = true;
-      speedHistory = [];
-      brakeLatched = false;
+      resetDetector();
       btnEngine.innerHTML = '<span style="font-size:16px;">⏹</span> SHUTDOWN REACTOR';
       btnEngine.classList.add('active');
       startGPS();

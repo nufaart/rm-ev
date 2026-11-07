@@ -3,7 +3,7 @@
 HUD kecepatan & suara engine untuk motor EV. Berjalan di browser (PWA) dan sebagai aplikasi Android (APK).
 
 ## Fitur
-- Suara hanya 3 mode: **IDLE**, **CRUISING** (volume naik halus mengikuti kecepatan), dan **ENGINE BRAKE** (hanya saat kecepatan turun ≥ 10 km/jam dalam 3 detik).
+- Suara hanya 3 mode: **IDLE**, **CRUISING** (nada tetap per klaster 10–30, 30–45, 45–60, 60–80 km/jam; volume naik-turun halus mengikuti kecepatan), dan **ENGINE BRAKE** (hanya saat kecepatan turun ≥ 10 km/jam dan berlangsung ≥ 1,5 detik).
 - Tombol **CEK UPDATE** untuk mengecek versi terbaru dari repo ini.
 - Di Android, engine tetap berjalan di background lewat foreground service.
 

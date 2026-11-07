@@ -8,3 +8,7 @@ android/.idea/
 *.apk
 *.log
 .DS_Store
+video/node_modules/
+video/capture/out/
+video/capture/*.png
+video/out/

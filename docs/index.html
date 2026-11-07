@@ -3,142 +3,325 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unduh CYBER EV ENGINE - APK Android</title>
-  <meta name="description" content="Unduh aplikasi CYBER EV ENGINE (HUD kecepatan dan suara engine) untuk Android.">
-  <meta name="theme-color" content="#030712">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='28' fill='%23030712'/><circle cx='64' cy='64' r='46' fill='none' stroke='rgba(6,182,212,0.2)' stroke-width='6'/><path d='M26 84 A 44 44 0 0 1 102 84' fill='none' stroke='%2306b6d4' stroke-width='8' stroke-linecap='round'/><path d='M64 28 L64 64 L86 64' stroke='%23ef4444' stroke-width='6' stroke-linecap='round'/></svg>">
+  <title>CYBER EV ENGINE - Unduh APK Android</title>
+  <meta name="description" content="Unduh CYBER EV ENGINE, HUD kecepatan dan suara engine untuk motor EV, versi Android (APK).">
+  <meta name="theme-color" content="#04060c">
+  <meta property="og:title" content="CYBER EV ENGINE - Unduh APK Android">
+  <meta property="og:description" content="HUD kecepatan dan suara engine untuk motor EV. Unduh APK Android gratis.">
+  <meta property="og:image" content="media/screen-cruise.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='28' fill='%2304060c'/><circle cx='64' cy='64' r='46' fill='none' stroke='rgba(34,227,255,0.25)' stroke-width='6'/><path d='M26 84 A 44 44 0 0 1 102 84' fill='none' stroke='%2322e3ff' stroke-width='8' stroke-linecap='round'/><path d='M64 28 L64 64 L86 64' stroke='%23ff3d8b' stroke-width='6' stroke-linecap='round'/></svg>">
   <style>
     :root {
-      --bg: #030712;
-      --panel: rgba(15, 23, 42, 0.75);
-      --border: rgba(56, 189, 248, 0.18);
-      --cyan: #06b6d4;
-      --red: #ef4444;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
+      --bg: #04060c;
+      --ink: #e8f7ff;
+      --muted: #7d8db0;
+      --cyan: #22e3ff;
+      --magenta: #ff3d8b;
+      --lime: #a6ff4d;
+      --line: rgba(34, 227, 255, .22);
+      --glass: rgba(12, 18, 32, .7);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { background: var(--bg); }
+    html { scroll-behavior: smooth; }
     body {
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
+      color: var(--ink);
+      font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6, 182, 212, 0.18), transparent),
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 30px 30px, 30px 30px;
-      padding: 0 16px 40px;
+        radial-gradient(ellipse 70% 40% at 50% -6%, rgba(34, 227, 255, .2), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 61, 139, .12), transparent 70%),
+        linear-gradient(rgba(34, 227, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 227, 255, .035) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    .wrap { max-width: 720px; margin: 0 auto; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 1.5px; font-size: 13px; color: var(--muted); }
-    .brand svg { width: 28px; height: 28px; }
-    .tag { font-size: 10px; font-weight: 800; color: var(--cyan); background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.3); padding: 3px 8px; border-radius: 6px; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    a { color: inherit; }
+    h1, h2, h3, .orb { font-family: 'Orbitron', sans-serif; }
 
-    .hero {
-      text-align: center;
-      padding: 36px 22px 30px;
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      background: radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), rgba(3,7,18,0.95));
-      box-shadow: 0 16px 40px -10px rgba(0,0,0,0.8), inset 0 0 30px rgba(6,182,212,0.05);
+    /* ===== NAV ===== */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 13px 4px 13px 4px; border: 1px solid var(--cyan);
+      background: conic-gradient(from 200deg, var(--cyan), transparent 40%, var(--magenta), transparent 80%, var(--cyan));
+      box-shadow: 0 0 18px rgba(34, 227, 255, .35);
     }
-    h1 { font-size: 26px; letter-spacing: 1px; font-weight: 900; }
-    .lead { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 10px auto 22px; max-width: 480px; }
+    .brand b { display: block; font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; }
+    .brand small { display: block; font-size: 10px; letter-spacing: 3px; color: var(--muted); }
+    .navlinks { display: flex; gap: 8px; align-items: center; }
+    .navlinks a {
+      font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; text-decoration: none;
+      padding: 9px 14px; border-radius: 999px; color: var(--muted); border: 1px solid transparent;
+    }
+    .navlinks a:hover { color: var(--ink); border-color: var(--line); }
+    .verpill {
+      font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1.5px; padding: 7px 12px;
+      border-radius: 999px; border: 1px solid var(--line); background: var(--glass); color: var(--cyan);
+    }
+
+    /* ===== HERO ===== */
+    .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: center; padding: 30px 0 60px; }
+    .kicker { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 4px; color: var(--cyan); }
+    h1 { font-size: clamp(34px, 5vw, 60px); line-height: 1.04; font-weight: 800; margin-top: 16px; letter-spacing: .5px; }
+    h1 span { color: var(--cyan); text-shadow: 0 0 28px rgba(34, 227, 255, .45); }
+    .lead { font-size: 20px; color: var(--muted); margin-top: 20px; max-width: 520px; line-height: 1.5; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; align-items: center; }
     .btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #06b6d4, #0284c7);
-      color: #030712;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      text-decoration: none;
-      padding: 16px 28px;
-      border-radius: 14px;
-      font-size: 15px;
-      box-shadow: 0 10px 30px -8px rgba(6,182,212,0.6);
+      display: inline-flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer;
+      font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 2px;
+      padding: 18px 30px; border-radius: 34px 12px 34px 12px; color: var(--bg);
+      background: linear-gradient(120deg, var(--cyan), #7af3ff);
+      box-shadow: 0 0 34px rgba(34, 227, 255, .4); border: 0;
+      transition: transform .15s, box-shadow .3s;
     }
-    .btn:active { transform: scale(0.98); }
-    .meta { margin-top: 16px; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: center; }
-    .meta b { color: var(--text); }
+    .btn:hover { box-shadow: 0 0 46px rgba(34, 227, 255, .6); }
+    .btn:active { transform: scale(.98); }
+    .btn.ghost { background: transparent; color: var(--cyan); border: 1px solid var(--line); box-shadow: none; }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
+    .stat {
+      padding: 10px 16px; border-radius: 18px 6px 18px 6px; border: 1px solid var(--line); background: var(--glass);
+      font-size: 14px; color: var(--muted);
+    }
+    .stat b { display: block; font-family: 'Orbitron', sans-serif; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
 
-    section { margin-top: 18px; background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 20px 22px; }
-    h2 { font-size: 13px; letter-spacing: 1.5px; color: var(--cyan); text-transform: uppercase; margin-bottom: 12px; }
-    ol, ul { padding-left: 20px; color: #cbd5e1; font-size: 14px; line-height: 1.7; }
-    li + li { margin-top: 4px; }
-    .feat { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    .feat div { background: rgba(3,7,18,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #cbd5e1; line-height: 1.5; }
-    .feat b { color: var(--text); display: block; margin-bottom: 2px; font-size: 14px; }
-    .notes { white-space: pre-wrap; font-size: 13px; color: #cbd5e1; line-height: 1.6; background: rgba(3,7,18,0.6); border-radius: 12px; padding: 12px 14px; max-height: 260px; overflow: auto; }
-    .warn { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
-    footer { text-align: center; margin-top: 26px; font-size: 12px; color: var(--muted); }
+    .hero-media { position: relative; display: flex; justify-content: center; }
+    .hero-media::before {
+      content: ""; position: absolute; inset: 8% 10%; border-radius: 50%;
+      background: radial-gradient(circle, rgba(34, 227, 255, .25), transparent 65%); filter: blur(30px);
+    }
+    .hero-media video {
+      position: relative; width: min(100%, 380px); height: auto; border-radius: 46px 14px 46px 14px;
+      border: 1px solid rgba(34, 227, 255, .5); box-shadow: 0 0 60px rgba(34, 227, 255, .25);
+      background: var(--bg);
+    }
+
+    /* ===== SECTION ===== */
+    section.block { padding: 70px 0; }
+    .head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+    .head .kicker { color: var(--magenta); }
+    h2 { font-size: clamp(24px, 3.4vw, 36px); font-weight: 800; letter-spacing: .5px; }
+    .sub { color: var(--muted); font-size: 18px; max-width: 620px; }
+
+    /* ===== BENTO FEATURES ===== */
+    .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+    .card {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--line); background: var(--glass); padding: 24px;
+      border-radius: 32px 10px 32px 10px;
+    }
+    .card::after {
+      content: ""; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%;
+      border: 1px solid rgba(255, 61, 139, .16); pointer-events: none;
+    }
+    .card h3 { font-size: 14px; letter-spacing: 2px; color: var(--cyan); margin-bottom: 10px; }
+    .card p { color: var(--muted); font-size: 17px; line-height: 1.5; }
+    .card .ico { font-size: 26px; margin-bottom: 12px; display: block; }
+    .c1 { grid-column: span 4; }
+    .c2 { grid-column: span 2; }
+    .c3 { grid-column: span 2; }
+    .c4 { grid-column: span 2; }
+    .c5 { grid-column: span 2; }
+    .c6 { grid-column: span 2; }
+    @media (max-width: 760px) { .c1, .c2, .c3, .c4, .c5, .c6 { grid-column: span 6; } }
+
+    /* ===== SHOWCASE ===== */
+    .shots { display: flex; gap: 18px; overflow-x: auto; padding: 6px 4px 24px; scroll-snap-type: x mandatory; }
+    .shots::-webkit-scrollbar { height: 6px; }
+    .shots::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+    .shot {
+      flex: 0 0 auto; width: 240px; scroll-snap-align: start;
+      border-radius: 36px 10px 36px 10px; border: 1px solid var(--line); background: var(--bg); padding: 8px;
+    }
+    .shot img { display: block; width: 100%; height: auto; border-radius: 30px 8px 30px 8px; }
+    .shot span { display: block; text-align: center; padding: 12px 0 6px; font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--muted); }
+
+    /* ===== INSTALL ===== */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; counter-reset: s; }
+    .step {
+      position: relative; padding: 26px 22px 22px; border-radius: 28px 8px 28px 8px;
+      border: 1px solid var(--line); background: var(--glass);
+    }
+    .step::before {
+      counter-increment: s; content: "0" counter(s);
+      font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 34px; color: var(--magenta);
+      text-shadow: 0 0 18px rgba(255, 61, 139, .45); display: block; margin-bottom: 12px;
+    }
+    .step p { color: var(--muted); font-size: 17px; line-height: 1.5; }
+    .step b { color: var(--ink); }
+    .note { margin-top: 18px; font-size: 15px; color: var(--muted); }
+
+    /* ===== RELEASE ===== */
+    .release {
+      border: 1px solid var(--line); background: var(--glass); border-radius: 36px 12px 36px 12px; padding: 30px;
+      display: grid; grid-template-columns: 1fr 1.2fr; gap: 26px; align-items: start;
+    }
+    .release .meta { display: flex; flex-direction: column; gap: 12px; }
+    .release .ver { font-family: 'Orbitron', sans-serif; font-size: 40px; font-weight: 800; color: var(--cyan); text-shadow: 0 0 24px rgba(34, 227, 255, .4); }
+    .release .row { color: var(--muted); font-size: 17px; }
+    .release .row b { color: var(--ink); }
+    .notes {
+      white-space: pre-wrap; font-size: 16px; line-height: 1.6; color: #c5d3ea;
+      background: rgba(3, 6, 14, .7); border: 1px solid rgba(255, 255, 255, .05);
+      border-radius: 22px 6px 22px 6px; padding: 18px; max-height: 300px; overflow: auto;
+    }
+    @media (max-width: 760px) { .release { grid-template-columns: 1fr; } }
+
+    /* ===== FOOTER ===== */
+    footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 30px 0 50px; color: var(--muted); font-size: 15px; }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; }
     footer a { color: var(--cyan); text-decoration: none; }
-    @media (min-width: 640px) { .feat { grid-template-columns: 1fr 1fr 1fr; } }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; text-align: left; }
+      .hero-media { order: -1; }
+      .hero-media video { width: min(100%, 300px); }
+      .navlinks a { display: none; }
+    }
+    @media (max-width: 520px) {
+      .release { padding: 22px; }
+      .lead { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="brand">
-      <svg viewBox="0 0 128 128" aria-hidden="true"><circle cx="64" cy="64" r="46" fill="none" stroke="rgba(6,182,212,0.25)" stroke-width="6"/><path d="M26 84 A 44 44 0 0 1 102 84" fill="none" stroke="#06b6d4" stroke-width="8" stroke-linecap="round"/><path d="M64 28 L64 64 L86 64" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/></svg>
-      CYBER EV ENGINE
+  <nav>
+    <a class="brand" href="#">
+      <span class="logo" aria-hidden="true"></span>
+      <span><b>CYBER EV</b><small>ENGINE HUD</small></span>
+    </a>
+    <div class="navlinks">
+      <a href="#fitur">FITUR</a>
+      <a href="#galeri">GALERI</a>
+      <a href="#pasang">PASANG</a>
+      <a href="#rilis">RILIS</a>
+      <span class="verpill" id="verTag">v—</span>
     </div>
-    <span class="tag" id="verTag">v—</span>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="kicker">ANDROID · HUD MOTOR EV</div>
+      <h1>Rasakan <span>setiap</span> putaran engine</h1>
+      <p class="lead">Kecepatan dari GPS, suara engine yang stabil per rentang kecepatan, akselerasi di atas 40 km/jam, dan engine brake saat kamu turun kecepatan besar.</p>
+      <div class="ctas">
+        <a class="btn" id="dlBtn" href="https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk">⬇ UNDUH APK</a>
+        <a class="btn ghost" href="#pasang">CARA PASANG</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="verTxt">—</b>Versi terbaru</div>
+        <div class="stat"><b id="sizeTxt">—</b>Ukuran APK</div>
+        <div class="stat"><b>Android 7.0+</b>Kompatibel</div>
+      </div>
+    </div>
+    <div class="hero-media">
+      <video src="media/promo.mp4" poster="media/screen-cruise.png" autoplay muted loop playsinline controls></video>
+    </div>
   </header>
 
-  <div class="hero">
-    <h1>HUD Kecepatan &amp; Suara Engine</h1>
-    <p class="lead">Aplikasi Android untuk motor EV Anda: kecepatan dari GPS, suara cruising yang stabil per rentang kecepatan, suara akselerasi di atas 40 km/jam, dan engine brake saat turun kecepatan besar. Bisa tetap berjalan di latar belakang.</p>
-    <a class="btn" id="dlBtn" href="https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk">Unduh APK</a>
-    <div class="meta">
-      <span>Versi: <b id="verTxt">—</b></span>
-      <span>Ukuran: <b id="sizeTxt">—</b></span>
-      <span>Rilis: <b id="dateTxt">—</b></span>
-      <span>Android 7.0+</span>
+  <section class="block" id="fitur">
+    <div class="head">
+      <div class="kicker">FITUR</div>
+      <h2>Dibuat untuk terdengar hidup</h2>
+      <p class="sub">Semua suara dibangun langsung di perangkat, jadi tidak perlu koneksi internet saat berkendara.</p>
     </div>
-  </div>
-
-  <section>
-    <h2>Cara memasang</h2>
-    <ol>
-      <li>Tekan <b>Unduh APK</b> di atas, lalu tunggu unduhan selesai.</li>
-      <li>Buka file <b>rm-ev.apk</b> dari notifikasi unduhan atau folder Download.</li>
-      <li>Jika diminta, izinkan <b>Pasang aplikasi dari sumber ini</b> untuk browser Anda.</li>
-      <li>Buka <b>CYBER EV ENGINE</b>, izinkan akses <b>lokasi</b> dan <b>notifikasi</b>.</li>
-      <li>Tekan <b>START ENGINE</b>. Notifikasi "Engine aktif" akan muncul saat app berjalan di latar belakang.</li>
-    </ol>
-    <p class="warn">APK ini dibagikan langsung, bukan dari Play Store, jadi Android akan menampilkan peringatan saat pemasangan. Unduh hanya dari halaman ini.</p>
-  </section>
-
-  <section>
-    <h2>Fitur</h2>
-    <div class="feat">
-      <div><b>Suara 3 mode</b>IDLE saat diam, CRUISING stabil per rentang kecepatan, dan ENGINE BRAKE saat turun kecepatan besar.</div>
-      <div><b>Akselerasi di atas 40 km/jam</b>Suara otomatis berubah ke akselerasi saat melewati 40 km/jam.</div>
-      <div><b>Cruising atau Akselerasi</b>Pilih karakter suara cruising untuk kecepatan di bawah 40 km/jam.</div>
-      <div><b>Jenis motor</b>Pilih karakter knalpot: Inline-4, R1 Crossplane, 2-Tak, Matic, Single, atau Harley V-Twin.</div>
-      <div><b>Cek update</b>Tombol CEK UPDATE di aplikasi memeriksa versi terbaru.</div>
-      <div><b>Background</b>Engine tetap jalan dengan notifikasi saat layar mati.</div>
+    <div class="bento">
+      <div class="card c1">
+        <span class="ico">🔊</span>
+        <h3>3 MODE SUARA</h3>
+        <p>IDLE saat diam, CRUISING yang stabil per klaster 10–30, 30–45, 45–60, dan 60–80 km/jam, serta ENGINE BRAKE hanya saat kecepatan turun besar dan berlangsung lebih dari 1,5 detik.</p>
+      </div>
+      <div class="card c2">
+        <span class="ico">⚡</span>
+        <h3>AKSELERASI</h3>
+        <p>Di atas 40 km/jam, suara berubah otomatis ke karakter akselerasi.</p>
+      </div>
+      <div class="card c3">
+        <span class="ico">🛵</span>
+        <h3>JENIS MOTOR</h3>
+        <p>Pilih karakter knalpot: Inline-4, R1 Crossplane, 2-Tak, Matic, Single, atau Harley V-Twin.</p>
+      </div>
+      <div class="card c4">
+        <span class="ico">📍</span>
+        <h3>GPS LIVE</h3>
+        <p>Kecepatan dibaca dari GPS. Mode simulasi tersedia untuk dicoba tanpa berkendara.</p>
+      </div>
+      <div class="card c5">
+        <span class="ico">🌙</span>
+        <h3>TETAP JALAN</h3>
+        <p>Engine tetap berjalan di latar belakang dengan notifikasi saat layar mati.</p>
+      </div>
+      <div class="card c6">
+        <span class="ico">⟳</span>
+        <h3>CEK UPDATE</h3>
+        <p>Tombol di aplikasi memeriksa versi terbaru dan membuka unduhannya.</p>
+      </div>
     </div>
   </section>
 
-  <section>
-    <h2>Catatan rilis terbaru</h2>
-    <div class="notes" id="notes">Memuat catatan rilis…</div>
+  <section class="block" id="galeri">
+    <div class="head">
+      <div class="kicker">GALERI</div>
+      <h2>Tampilan aplikasi asli</h2>
+      <p class="sub">Tangkapan layar dari aplikasi Android yang sama dengan APK di bawah.</p>
+    </div>
+    <div class="shots">
+      <figure class="shot"><img src="media/screen-cruise.png" alt="Mode cruising 20 km/jam" loading="lazy"><span>CRUISING</span></figure>
+      <figure class="shot"><img src="media/screen-accel.png" alt="Mode akselerasi 78 km/jam" loading="lazy"><span>AKSELERASI</span></figure>
+      <figure class="shot"><img src="media/screen-brake.png" alt="Engine brake" loading="lazy"><span>ENGINE BRAKE</span></figure>
+      <figure class="shot"><img src="media/screen-drawer.png" alt="Panel kontrol" loading="lazy"><span>PANEL KONTROL</span></figure>
+    </div>
   </section>
 
-  <footer>
-    <a href="https://github.com/nufaart/rm-ev">Kode sumber</a> ·
-    <a href="https://github.com/nufaart/rm-ev/releases">Semua versi</a>
-  </footer>
+  <section class="block" id="pasang">
+    <div class="head">
+      <div class="kicker">PASANG</div>
+      <h2>Empat langkah saja</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><p><b>Unduh APK</b> lewat tombol di atas dan tunggu unduhan selesai.</p></div>
+      <div class="step"><p>Buka <b>rm-ev.apk</b> dari notifikasi unduhan atau folder Download.</p></div>
+      <div class="step"><p>Izinkan <b>pasang dari sumber ini</b> untuk browser kamu bila diminta.</p></div>
+      <div class="step"><p>Buka aplikasi, izinkan <b>lokasi</b> dan <b>notifikasi</b>, lalu tekan <b>START ENGINE</b>.</p></div>
+    </div>
+    <p class="note">APK ini dibagikan langsung, bukan dari Play Store, jadi Android akan menampilkan peringatan saat pemasangan. Unduh hanya dari halaman ini.</p>
+  </section>
+
+  <section class="block" id="rilis">
+    <div class="head">
+      <div class="kicker">RILIS</div>
+      <h2>Versi terbaru</h2>
+    </div>
+    <div class="release">
+      <div class="meta">
+        <div class="ver" id="verBig">v—</div>
+        <div class="row">Dirilis: <b id="dateTxt">—</b></div>
+        <div class="row">Ukuran: <b id="sizeTxt2">—</b></div>
+        <a class="btn" href="https://github.com/nufaart/rm-ev/releases" style="align-self:flex-start;margin-top:8px">SEMUA VERSI</a>
+      </div>
+      <div class="notes" id="notes">Memuat catatan rilis…</div>
+    </div>
+  </section>
 </div>
+
+<footer>
+  <div class="wrap">
+    <span>CYBER EV SOUND SYNTHESIZER · © 2026</span>
+    <span><a href="https://github.com/nufaart/rm-ev">Kode sumber</a> · <a href="https://github.com/nufaart/rm-ev/releases">Rilis</a></span>
+  </div>
+</footer>
 
 <script>
   (function () {
     var API = 'https://api.github.com/repos/nufaart/rm-ev/releases/latest';
     var VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
-
+    function set(id, text) { var el = document.getElementById(id); if (el) el.textContent = text; }
     function fmtSize(bytes) { return bytes ? (bytes / 1048576).toFixed(1) + ' MB' : '—'; }
     function fmtDate(iso) {
       if (!iso) return '—';
@@ -150,28 +333,26 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (rel) {
         var tag = (rel.tag_name || '').replace(/^v/, '');
-        document.getElementById('verTxt').textContent = tag || '—';
-        document.getElementById('verTag').textContent = 'v' + tag;
-        document.getElementById('dateTxt').textContent = fmtDate(rel.published_at);
+        set('verTxt', tag || '—'); set('verBig', 'v' + tag); set('verTag', 'v' + tag);
+        set('dateTxt', fmtDate(rel.published_at));
         var apk = (rel.assets || []).filter(function (a) { return a.name === 'rm-ev.apk'; })[0];
         if (apk) {
-          document.getElementById('sizeTxt').textContent = fmtSize(apk.size);
+          set('sizeTxt', fmtSize(apk.size)); set('sizeTxt2', fmtSize(apk.size));
           document.getElementById('dlBtn').href = apk.browser_download_url;
         }
-        document.getElementById('notes').textContent = rel.body || 'Belum ada catatan rilis.';
+        set('notes', rel.body || 'Belum ada catatan rilis.');
       })
       .catch(function () {
-        document.getElementById('notes').textContent = 'Catatan rilis tidak bisa dimuat sekarang. Lihat halaman rilis di GitHub.';
+        set('notes', 'Catatan rilis tidak bisa dimuat sekarang. Lihat halaman rilis di GitHub.');
       });
 
-    // Versi dari version.json sebagai cadangan jika API tidak bisa diakses
+    // Cadangan: versi dari version.json bila API tidak bisa diakses
     fetch(VERSION_URL, { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (info) {
         var v = info.version || '';
         if (document.getElementById('verTxt').textContent === '—') {
-          document.getElementById('verTxt').textContent = v;
-          document.getElementById('verTag').textContent = 'v' + v;
+          set('verTxt', v); set('verBig', 'v' + v); set('verTag', 'v' + v);
         }
       })
       .catch(function () {});

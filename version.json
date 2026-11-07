@@ -1,0 +1,5 @@
+{
+  "version": "3.3.0",
+  "apk": "https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk",
+  "notes": "Suara 3 mode (idle, cruising, engine brake), tombol update, dukungan Android background."
+}

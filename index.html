@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CYBER EV ENGINE - HUD</title>
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='28' fill='%23030712'/><circle cx='64' cy='64' r='46' fill='none' stroke='rgba(6,182,212,0.2)' stroke-width='6'/><path d='M26 84 A 44 44 0 0 1 102 84' fill='none' stroke='%2306b6d4' stroke-width='8' stroke-linecap='round'/><path d='M64 28 L64 64 L86 64' stroke='%23ef4444' stroke-width='6' stroke-linecap='round'/></svg>">
+
+  <!-- In-Memory Self-Generated Manifest -->
+  <script>
+    (function injectManifest() {
+      const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#030712"/><circle cx="64" cy="64" r="46" fill="none" stroke="rgba(6, 182, 212, 0.2)" stroke-width="6"/><path d="M26 84 A 44 44 0 0 1 102 84" fill="none" stroke="#06b6d4" stroke-width="8" stroke-linecap="round"/><path d="M64 28 L64 64 L86 64" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/><circle cx="64" cy="64" r="5" fill="#f8fafc"/></svg>`;
+      const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
+      const manifestData = {
+        name: "CYBER EV ENGINE",
+        short_name: "CyberEV",
+        start_url: window.location.href,
+        display: "standalone",
+        background_color: "#030712",
+        theme_color: "#030712",
+        orientation: "portrait",
+        icons: [{ src: iconUrl, sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }]
+      };
+      const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = URL.createObjectURL(blob);
+      document.head.appendChild(manifestLink);
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg: #030712;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.45);
+      --red: #ef4444;
+      --red-glow: rgba(239, 68, 68, 0.45);
+      --amber: #f59e0b;
+      --green: #10b981;
+      --surface: rgba(15, 23, 42, 0.7);
+      --border: rgba(56, 189, 248, 0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6, 182, 212, 0.15), transparent),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 14px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Orbitron", sans-serif;
+    }
+
+    .hud-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .pwa-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--cyan);
+      backdrop-filter: blur(12px);
+      padding: 12px 14px;
+      border-radius: 14px;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+    }
+    .pwa-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+    .perm-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(3, 7, 18, 0.6);
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .perm-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+    .perm-item input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+    .btn-install-action {
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #030712;
+      border: none;
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .btn-install-action:active { transform: scale(0.98); }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .hud-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #94a3b8;
+    }
+    .version-tag {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #475569;
+      transition: background 0.3s;
+    }
+    .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .status-dot.warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .icon-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: #94a3b8;
+      padding: 5px 9px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s;
+    }
+    .icon-chip:active { transform: scale(0.96); border-color: var(--cyan); color: #fff; }
+
+    .hud-gauge {
+      position: relative;
+      background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 22px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(6, 182, 212, 0.04);
+      overflow: hidden;
+    }
+
+    .gauge-svg {
+      width: 250px;
+      height: 135px;
+      margin-bottom: -15px;
+    }
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+    .gauge-fill {
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 0.12s ease-out, stroke 0.3s;
+      filter: drop-shadow(0 0 6px var(--cyan-glow));
+    }
+
+    .speed-wrapper {
+      position: relative;
+      text-align: center;
+      margin-top: -65px;
+    }
+    .speed-val {
+      font-size: 88px;
+      font-weight: 900;
+      line-height: 0.95;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -2px;
+      filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+    }
+    .speed-unit {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .hud-state {
+      margin-top: 14px;
+      padding: 5px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s;
+    }
+    .state-idle { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+    .state-accel { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid var(--cyan); box-shadow: 0 0 15px var(--cyan-glow); }
+    .state-cruise { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid var(--green); }
+    .state-enginebrake { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid var(--red); box-shadow: 0 0 15px var(--red-glow); animation: brakeGlow 0.8s infinite alternate; }
+    @keyframes brakeGlow { 0% { opacity: 0.8; } 100% { opacity: 1; transform: scale(1.02); } }
+
+    .telemetry-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .tele-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tele-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 1px;
+    }
+    .tele-val {
+      font-size: 13px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: #f1f5f9;
+    }
+    .tele-val.turun { color: var(--red); text-shadow: 0 0 8px var(--red-glow); }
+    .tele-val.nanjak { color: var(--cyan); }
+
+    .preset-selector {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 1px;
+    }
+    select {
+      width: 100%;
+      background: rgba(3, 7, 18, 0.7);
+      border: 1px solid var(--border);
+      color: #38bdf8;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .ignition-btn {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.3));
+      border: 1px solid var(--red);
+      color: #fca5a5;
+      padding: 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .ignition-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(16, 185, 129, 0.3));
+      border: 1px solid var(--cyan);
+      color: #a5f3fc;
+      box-shadow: 0 0 25px var(--cyan-glow);
+    }
+    .ignition-btn:active { transform: scale(0.98); }
+
+    .manual-test-box {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px dashed #334155;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); }
+
+    .hud-footer {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #475569;
+      padding: 4px 6px 0;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hud-container">
+  <!-- PWA Install & Permissions Matrix Panel -->
+  <div class="pwa-panel" id="pwaPanel">
+    <div class="pwa-header">
+      <span>INSTALASI HUD & KONFIGURASI IZIN</span>
+      <span style="font-size:9px; color:#64748b;">PWA SETUP</span>
+    </div>
+    <div class="perm-list">
+      <label class="perm-item">
+        <span>📍 Akses Kecepatan Satelit GPS</span>
+        <input type="checkbox" id="permGPS" checked>
+      </label>
+      <label class="perm-item">
+        <span>📐 Akses Kemiringan Gyroscope</span>
+        <input type="checkbox" id="permGyro" checked>
+      </label>
+      <label class="perm-item">
+        <span>☀️ Kunci Layar Tetap Aktif (WakeLock)</span>
+        <input type="checkbox" id="permWake" checked>
+      </label>
+    </div>
+    <button class="btn-install-action" id="btnInstallApp">
+      PASANG & AKTIFKAN IZIN
+    </button>
+  </div>
+
+  <!-- Top Minimal Bar with Version Tag -->
+  <div class="hud-header">
+    <div class="hud-brand">
+      <span class="status-dot" id="gpsDot"></span>
+      <span id="gpsLabel">GPS READY</span>
+      <span class="version-tag">v3.3</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-chip" id="btnTare">TARE STANG</button>
+      <button class="icon-chip" id="btnWake">WAKE: OFF</button>
+      <button class="icon-chip" id="btnTestMode">SIM</button>
+      <button class="icon-chip" id="btnUpdate">CEK UPDATE</button>
+    </div>
+  </div>
+
+  <!-- Cyber Hologram Gauge -->
+  <div class="hud-gauge">
+    <svg class="gauge-svg" viewBox="0 0 200 110">
+      <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
+      <path class="gauge-fill" id="gaugeFill" d="M 20 100 A 80 80 0 0 1 180 100" />
+    </svg>
+    <div class="speed-wrapper">
+      <div class="speed-val" id="speedDisp">0</div>
+      <div class="speed-unit">KM/H • MAX 40</div>
+    </div>
+    <div class="hud-state state-idle" id="stateBadge">IDLE STANDBY</div>
+  </div>
+
+  <!-- Real-time Telemetry -->
+  <div class="telemetry-row">
+    <div class="tele-cell">
+      <span class="tele-label">PITCH GYRO</span>
+      <span class="tele-val" id="inclineDisp">0.0°</span>
+    </div>
+    <div class="tele-cell">
+      <span class="tele-label">ENGINE LOAD</span>
+      <span class="tele-val" id="loadDisp">0%</span>
+    </div>
+  </div>
+
+  <!-- Test Mode Drawer -->
+  <div class="manual-test-box" id="testBox">
+    <div style="display:flex; justify-content:space-between;">
+      <span>Manual Speed: <b id="manualVal">0</b> km/h</span>
+      <span>Tilt: <b id="tiltVal">0°</b></span>
+    </div>
+    <input type="range" id="manualSlider" min="0" max="40" step="0.5" value="0">
+    <input type="range" id="manualTilt" min="-25" max="25" step="1" value="0">
+  </div>
+
+  <!-- Main Ignition Action -->
+  <button class="ignition-btn" id="btnEngine">
+    <span style="font-size:16px;">⚡</span> START ENGINE
+  </button>
+</div>
+
+<!-- Bottom Version Footer -->
+<div class="hud-footer">
+  <span>CYBER EV SOUND SYNTHESIZER</span>
+  <span>BUILD v3.3.0 • 2026</span>
+</div>
+
+<script>
+  // In-Memory Service Worker
+  if ('serviceWorker' in navigator) {
+    const swScript = `
+      self.addEventListener('install', (e) => self.skipWaiting());
+      self.addEventListener('activate', (e) => clients.claim());
+      self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+    `;
+    const swBlob = new Blob([swScript], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+  }
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  let installPromptEvent = null;
+  const pwaPanel = document.getElementById('pwaPanel');
+  const btnInstallApp = document.getElementById('btnInstallApp');
+
+  if (isStandalone || localStorage.getItem('pwa_installed') === 'true') {
+    pwaPanel.style.display = 'none';
+  } else {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      installPromptEvent = e;
+      pwaPanel.style.display = 'flex';
+    });
+  }
+
+  btnInstallApp.addEventListener('click', async () => {
+    if (document.getElementById('permWake').checked) requestWakeLock();
+    if (document.getElementById('permGyro').checked && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try { await DeviceOrientationEvent.requestPermission(); } catch (err) {}
+    }
+    if (document.getElementById('permGPS').checked && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(() => {}, () => {});
+    }
+
+    if (installPromptEvent) {
+      installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+      if (choice.outcome === 'accepted') {
+        localStorage.setItem('pwa_installed', 'true');
+        pwaPanel.style.display = 'none';
+      }
+      installPromptEvent = null;
+    } else {
+      alert('Izin diterapkan! Untuk memasang ke stang:\\n1. Ketuk titik tiga (⋮) di Chrome.\\n2. Pilih "Tambahkan ke Layar Utama" / "Instal Aplikasi".');
+      localStorage.setItem('pwa_installed', 'true');
+      pwaPanel.style.display = 'none';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    localStorage.setItem('pwa_installed', 'true');
+    pwaPanel.style.display = 'none';
+  });
+
+  let isEngineRunning = false;
+  let audioCtx = null;
+  let oscMain, oscHarmonic, oscSub, noiseNode;
+  let waveShaperNode, filterLowPass, mainGainNode, noiseGain;
+
+  let currentSpeed = 0, targetSpeed = 0;
+  let lastTimestamp = performance.now();
+  let currentPitch = 0, zeroPitchOffset = 0;
+  let isTestMode = false;
+
+  // ===== HANYA 3 SUARA: IDLE, CRUISE (volume naik halus mengikuti kecepatan), ENGINE BRAKE =====
+  const BRAKE_DROP_KMH = 10;    // penurunan minimal dalam jendela waktu => engine brake
+  const BRAKE_WINDOW_MS = 3000; // jendela waktu pengukuran penurunan
+  const BRAKE_RELEASE_KMH = 4;  // histeresis: keluar dari engine brake jika penurunan < 4
+  const APP_VERSION = '3.3.0';
+  const VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
+  const RELEASE_URL = 'https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk';
+
+  let speedHistory = [];
+  let brakeLatched = false;
+
+  function makeDistortionCurve(amount = 22) {
+    const k = amount;
+    const n_samples = 44100;
+    const curve = new Float32Array(n_samples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; ++i) {
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  function initAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    oscMain = audioCtx.createOscillator();
+    oscHarmonic = audioCtx.createOscillator();
+    oscSub = audioCtx.createOscillator();
+    oscMain.type = 'sawtooth';
+    oscHarmonic.type = 'triangle';
+    oscSub.type = 'sawtooth';
+
+    waveShaperNode = audioCtx.createWaveShaper();
+    waveShaperNode.curve = makeDistortionCurve(24);
+    waveShaperNode.oversample = '4x';
+
+    filterLowPass = audioCtx.createBiquadFilter();
+    filterLowPass.type = 'lowpass';
+    filterLowPass.frequency.value = 300;
+    filterLowPass.Q.value = 3;
+
+    // Noise: hanya terdengar saat engine brake (crackle)
+    const bufferSize = audioCtx.sampleRate * 2;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+    noiseNode = audioCtx.createBufferSource();
+    noiseNode.buffer = noiseBuffer;
+    noiseNode.loop = true;
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 650;
+    noiseFilter.Q.value = 2.5;
+    noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0;
+    noiseNode.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+
+    mainGainNode = audioCtx.createGain();
+    mainGainNode.gain.value = 0;
+
+    oscMain.connect(waveShaperNode);
+    oscHarmonic.connect(waveShaperNode);
+    oscSub.connect(waveShaperNode);
+    waveShaperNode.connect(filterLowPass);
+    noiseGain.connect(filterLowPass);
+    filterLowPass.connect(mainGainNode);
+    mainGainNode.connect(audioCtx.destination);
+
+    oscMain.start();
+    oscHarmonic.start();
+    oscSub.start();
+    noiseNode.start();
+  }
+
+  // Tentukan state dari kecepatan. Engine brake hanya jika turun >= BRAKE_DROP_KMH dalam BRAKE_WINDOW_MS.
+  function detectState(speed, now) {
+    speedHistory.push({ t: now, v: speed });
+    while (speedHistory.length && now - speedHistory[0].t > BRAKE_WINDOW_MS) speedHistory.shift();
+
+    if (speed < 1.0) {
+      speedHistory = [];
+      brakeLatched = false;
+      return 'IDLE';
+    }
+
+    let peak = speed;
+    for (const s of speedHistory) if (s.v > peak) peak = s.v;
+    const drop = peak - speed;
+
+    if (!brakeLatched && drop >= BRAKE_DROP_KMH) brakeLatched = true;
+    else if (brakeLatched && drop < BRAKE_RELEASE_KMH) brakeLatched = false;
+
+    return brakeLatched ? 'ENGINE_BRAKE' : 'CRUISE';
+  }
+
+  function updateSound(speed) {
+    if (!audioCtx || !isEngineRunning) return;
+    const t = audioCtx.currentTime;
+    const norm = Math.min(Math.max(speed / 40, 0), 1);
+    const state = detectState(speed, performance.now());
+
+    const stateBadge = document.getElementById('stateBadge');
+    const gaugeFill = document.getElementById('gaugeFill');
+    gaugeFill.style.strokeDashoffset = 283 - (norm * 283);
+    stateBadge.className = 'hud-state';
+
+    let freq, master, lp, noise, load;
+    if (state === 'IDLE') {
+      freq = 38; master = 0.10; lp = 260; noise = 0.01; load = 20;
+      stateBadge.classList.add('state-idle');
+      stateBadge.innerText = 'IDLE STANDBY';
+      gaugeFill.style.stroke = 'var(--cyan)';
+    } else if (state === 'CRUISE') {
+      // Volume dan nada naik perlahan seiring kecepatan (smooth, tanpa lompatan)
+      freq = 48 + norm * 150;
+      master = 0.14 + norm * 0.36;
+      lp = 500 + norm * 1100;
+      noise = 0.02;
+      load = Math.round(45 + norm * 40);
+      stateBadge.classList.add('state-cruise');
+      stateBadge.innerText = 'CRUISING STABLE';
+      gaugeFill.style.stroke = 'var(--green)';
+    } else {
+      freq = 44 + norm * 110; master = 0.30; lp = 260 + norm * 180; noise = 0.10; load = 25;
+      stateBadge.classList.add('state-enginebrake');
+      stateBadge.innerText = '⛔ ENGINE BRAKE';
+      gaugeFill.style.stroke = 'var(--red)';
+    }
+
+    oscMain.frequency.setTargetAtTime(freq, t, 0.12);
+    oscHarmonic.frequency.setTargetAtTime(freq * 1.5, t, 0.12);
+    oscSub.frequency.setTargetAtTime(freq * 0.5, t, 0.12);
+    mainGainNode.gain.setTargetAtTime(master, t, 0.4);
+    filterLowPass.frequency.setTargetAtTime(lp, t, 0.2);
+    noiseGain.gain.setTargetAtTime(noise, t, 0.2);
+
+    document.getElementById('loadDisp').innerText = `${load}%`;
+  }
+
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      let rawPitch = (e.beta !== null) ? e.beta : 0;
+      currentPitch = rawPitch - zeroPitchOffset;
+      updateInclineUI(currentPitch);
+    });
+  }
+
+  function updateInclineUI(pitch) {
+    const disp = document.getElementById('inclineDisp');
+    disp.innerText = `${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)}°`;
+    disp.className = 'tele-val';
+    if (pitch <= -3.8) {
+      disp.classList.add('turun');
+    } else if (pitch >= 3.8) {
+      disp.classList.add('nanjak');
+    }
+  }
+
+  document.getElementById('btnTare').addEventListener('click', () => {
+    zeroPitchOffset = currentPitch + zeroPitchOffset;
+    currentPitch = 0;
+    updateInclineUI(0);
+  });
+
+  let watchId = null;
+  function startGPS() {
+    if ('geolocation' in navigator) {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          document.getElementById('gpsDot').className = 'status-dot active';
+          document.getElementById('gpsLabel').innerText = 'GPS LOCKED';
+          let speedKmh = (pos.coords.speed !== null && pos.coords.speed >= 0) ? pos.coords.speed * 3.6 : 0;
+          if (!isTestMode) targetSpeed = Math.min(speedKmh, 40);
+        },
+        () => {
+          document.getElementById('gpsDot').className = 'status-dot warn';
+          document.getElementById('gpsLabel').innerText = 'GPS SEARCH';
+        },
+        { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 }
+      );
+    }
+  }
+
+  function physicsLoop() {
+    const now = performance.now();
+    const dt = (now - lastTimestamp) / 1000;
+    lastTimestamp = now;
+
+    currentSpeed += (targetSpeed - currentSpeed) * Math.min(dt * 6.0, 1.0);
+    document.getElementById('speedDisp').innerText = Math.round(currentSpeed);
+    updateSound(currentSpeed);
+
+    if (isEngineRunning) requestAnimationFrame(physicsLoop);
+  }
+
+  // Jembatan ke lapisan native (Android). Di browser biasa tidak ada, jadi diabaikan.
+  function nativePlugin(name) {
+    try {
+      return window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()
+        ? window.Capacitor.Plugins[name] : null;
+    } catch (e) { return null; }
+  }
+
+  const btnEngine = document.getElementById('btnEngine');
+  btnEngine.addEventListener('click', () => {
+    if (!isEngineRunning) {
+      if (!audioCtx) initAudio();
+      audioCtx.resume();
+      isEngineRunning = true;
+      speedHistory = [];
+      brakeLatched = false;
+      btnEngine.innerHTML = '<span style="font-size:16px;">⏹</span> SHUTDOWN REACTOR';
+      btnEngine.classList.add('active');
+      startGPS();
+      const keep = nativePlugin('KeepAlive');
+      if (keep) keep.start().catch(() => {});
+      lastTimestamp = performance.now();
+      requestAnimationFrame(physicsLoop);
+    } else {
+      isEngineRunning = false;
+      if (audioCtx) audioCtx.suspend();
+      const keep = nativePlugin('KeepAlive');
+      if (keep) keep.stop().catch(() => {});
+      btnEngine.innerHTML = '<span style="font-size:16px;">⚡</span> START ENGINE';
+      btnEngine.classList.remove('active');
+      document.getElementById('speedDisp').innerText = '0';
+      document.getElementById('gaugeFill').style.strokeDashoffset = 283;
+      document.getElementById('stateBadge').className = 'hud-state state-idle';
+      document.getElementById('stateBadge').innerText = 'STANDBY';
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    }
+  });
+
+  document.getElementById('btnTestMode').addEventListener('click', () => {
+    isTestMode = !isTestMode;
+    document.getElementById('testBox').style.display = isTestMode ? 'flex' : 'none';
+    document.getElementById('btnTestMode').style.borderColor = isTestMode ? 'var(--cyan)' : 'var(--border)';
+    document.getElementById('btnTestMode').style.color = isTestMode ? 'var(--cyan)' : '#94a3b8';
+  });
+
+  document.getElementById('manualSlider').addEventListener('input', (e) => {
+    targetSpeed = parseFloat(e.target.value);
+    document.getElementById('manualVal').innerText = targetSpeed.toFixed(1);
+  });
+
+  document.getElementById('manualTilt').addEventListener('input', (e) => {
+    currentPitch = parseFloat(e.target.value);
+    document.getElementById('tiltVal').innerText = `${currentPitch}°`;
+    updateInclineUI(currentPitch);
+  });
+
+  let wakeLockObj = null;
+  async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        wakeLockObj = await navigator.wakeLock.request('screen');
+        const btn = document.getElementById('btnWake');
+        btn.innerText = 'WAKE: ON';
+        btn.style.color = 'var(--cyan)';
+        btn.style.borderColor = 'var(--cyan)';
+      } catch (err) {}
+    }
+  }
+
+  document.getElementById('btnWake').addEventListener('click', async () => {
+    const btn = document.getElementById('btnWake');
+    if ('wakeLock' in navigator) {
+      if (!wakeLockObj) {
+        await requestWakeLock();
+      } else {
+        await wakeLockObj.release();
+        wakeLockObj = null;
+        btn.innerText = 'WAKE: OFF';
+        btn.style.color = '#94a3b8';
+        btn.style.borderColor = 'var(--border)';
+      }
+    }
+  });
+  // ===== UPDATE APLIKASI =====
+  function isNewerVersion(remote, local) {
+    const a = String(remote).split('.').map(n => parseInt(n, 10) || 0);
+    const b = String(local).split('.').map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      const x = a[i] || 0, y = b[i] || 0;
+      if (x !== y) return x > y;
+    }
+    return false;
+  }
+
+  function setUpdateLabel(text, resetAfterMs) {
+    const btn = document.getElementById('btnUpdate');
+    btn.innerText = text;
+    if (resetAfterMs) setTimeout(() => { btn.innerText = 'CEK UPDATE'; btn.disabled = false; }, resetAfterMs);
+  }
+
+  async function checkForUpdate() {
+    const btn = document.getElementById('btnUpdate');
+    btn.disabled = true;
+    setUpdateLabel('MENGECEK...');
+    try {
+      const res = await fetch(VERSION_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const info = await res.json();
+      if (!isNewerVersion(info.version, APP_VERSION)) {
+        setUpdateLabel('SUDAH TERBARU v' + APP_VERSION, 2500);
+        return;
+      }
+      btn.disabled = false;
+      setUpdateLabel('UPDATE v' + info.version);
+      if (!confirm('Versi baru v' + info.version + ' tersedia (saat ini v' + APP_VERSION + ').\nPasang update sekarang?')) return;
+
+      const keep = nativePlugin('KeepAlive');
+      if (keep) {
+        // Native: buka tautan APK terbaru di browser untuk diunduh & dipasang
+        await keep.openUrl({ url: info.apk || RELEASE_URL });
+      } else {
+        // Web/PWA: muat ulang agar mengambil versi terbaru dari server
+        location.reload();
+      }
+    } catch (err) {
+      setUpdateLabel('GAGAL CEK UPDATE', 2500);
+      return;
+    }
+    btn.disabled = false;
+  }
+
+  document.getElementById('btnUpdate').addEventListener('click', checkForUpdate);
+
+</script>
+</body>
+</html>

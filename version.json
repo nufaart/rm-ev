@@ -1,5 +1,5 @@
 {
-  "version": "3.7.0",
+  "version": "3.8.0",
   "apk": "https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk",
-  "notes": "Grafik pemantauan Dynamic Telemetry Log 4-channel, perbaikan warna HUD, dan peningkatan responsivitas suara saat layar terkunci."
+  "notes": "Pengaturan Top Speed dinamis (20-150 km/h) yang otomatis menyesuaikan skala 6 klaster nada, volume mesin, slider simulasi, dan grafik telemetri."
 }

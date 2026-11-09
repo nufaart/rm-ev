@@ -1,5 +1,5 @@
 {
-  "version": "3.6.0",
+  "version": "3.7.0",
   "apk": "https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk",
-  "notes": "Suara 3 mode (idle, cruising, engine brake), tombol update, dukungan Android background."
+  "notes": "Grafik pemantauan Dynamic Telemetry Log 4-channel, perbaikan warna HUD, dan peningkatan responsivitas suara saat layar terkunci."
 }

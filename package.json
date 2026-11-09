@@ -1,6 +1,6 @@
 {
   "name": "rm-ev",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "private": true,
   "description": "CYBER EV ENGINE - HUD (web + Android APK via Capacitor)",
   "scripts": {

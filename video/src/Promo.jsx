@@ -16,11 +16,11 @@ const sec = (s) => Math.round(s * FPS);
 
 // Tahap caption (detik) — mengikuti urutan di video/capture/capture.mjs
 const SCENES = [
-  { from: 0, to: 3, kicker: 'CYBER EV ENGINE', title: 'HUD kecepatan & suara engine', sub: 'Untuk motor EV kamu' },
-  { from: 3, to: 10.5, kicker: 'CRUISING', title: 'Suara stabil per klaster', sub: 'Nada tetap di 10-30, 30-45, 45-60, 60-80 km/jam' },
-  { from: 10.5, to: 17, kicker: 'AKSELERASI', title: 'Di atas 40 km/jam', sub: 'Suara berubah otomatis ke akselerasi' },
-  { from: 17, to: 23, kicker: 'ENGINE BRAKE', title: 'Turun kecepatan besar', sub: 'Hanya saat turun minimal 10 km/jam dan lebih dari 1,5 detik' },
-  { from: 23, to: 31, kicker: 'KONTROL', title: 'Pilih jenis motor', sub: 'Karakter knalpot dan mode suara dari drawer' },
+  { from: 0, to: 3, kicker: 'CYBER EV ENGINE v4.0', title: 'Starter Crank & Ignition Roar', sub: 'HUD kecepatan, grafik telemetri 4-channel & sintesis suara EV' },
+  { from: 3, to: 10.5, kicker: 'DYNAMIC TELEMETRY', title: 'Grafik real-time 4-channel', sub: 'Pantau Speed, Gyro Pitch, Sound Pitch & Filter/Volume' },
+  { from: 10.5, to: 17, kicker: 'TOP SPEED & AKSELERASI', title: 'Skala klaster & volume adaptif', sub: 'Atur Top Speed 20-150 km/jam, volume otomatis menyesuaikan' },
+  { from: 17, to: 23, kicker: 'ENGINE BRAKE', title: 'Deselerasi kompresi realistis', sub: 'Otomatis aktif saat kecepatan turun tajam & cukup lama' },
+  { from: 23, to: 31, kicker: 'KONTROL & OTA UPDATE', title: '7 Preset Motor & Update Instan', sub: 'Update fitur langsung di dalam app tanpa perlu uninstall' },
 ];
 
 const Caption = ({ scene, durationFrames }) => {

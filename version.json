@@ -1,5 +1,5 @@
 {
-  "version": "3.9.0",
+  "version": "4.0.0",
   "apk": "https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk",
-  "notes": "Efek suara realistis saat klik Start Engine (dinamo starter + ignition roar) dan Shutdown Reactor (spool-down dekompresi + klik relay), serta Top Speed dinamis."
+  "notes": "v4.0.0: Fitur Update Instan di dalam App (OTA tanpa download ulang APK & sertifikat permanen anti-bentrok), Suara Start Engine & Shutdown Reactor, Top Speed Dinamis (20-150 km/h), dan Grafik Dynamic Telemetry Log 4-Channel."
 }

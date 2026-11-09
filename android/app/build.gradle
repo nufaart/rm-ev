@@ -1,4 +1,19 @@
 apply plugin: 'com.android.application'
+import groovy.json.JsonSlurper
+
+def pkgVersionName = "4.0.0"
+def pkgVersionCode = 40000
+try {
+    def vFile = file("../../version.json")
+    if (vFile.exists()) {
+        def vJson = new JsonSlurper().parseText(vFile.text)
+        if (vJson.version) {
+            pkgVersionName = vJson.version.toString()
+            def parts = pkgVersionName.tokenize('.').collect { it.toInteger() }
+            pkgVersionCode = (parts[0] ?: 1) * 10000 + (parts.size() > 1 ? parts[1] * 100 : 0) + (parts.size() > 2 ? parts[2] : 0)
+        }
+    }
+} catch (Exception ignored) {}
 
 android {
     namespace = "com.nufaart.rmev"
@@ -7,8 +22,8 @@ android {
         applicationId "com.nufaart.rmev"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode pkgVersionCode
+        versionName pkgVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +31,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        rmevPermanent {
+            storeFile file("rmev-signing.p12")
+            storePassword "rmevpassword"
+            keyAlias "rmevkey"
+            keyPassword "rmevpassword"
+            storeType "PKCS12"
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.rmevPermanent
+        }
         release {
+            signingConfig signingConfigs.rmevPermanent
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

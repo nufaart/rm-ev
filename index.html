@@ -239,7 +239,73 @@
       border-radius: 14px 5px 14px 5px;
       padding: 7px 10px;
       flex-direction: column;
+      gap: 6px;
+    }
+    .sim-topspeed-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(34, 227, 255, 0.12);
+    }
+    .sim-topspeed-row span {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .topspeed-chips {
+      display: flex;
       gap: 4px;
+    }
+    .ts-chip {
+      border: 1px solid var(--line);
+      background: rgba(3, 6, 14, 0.7);
+      color: var(--muted);
+      border-radius: 8px 3px 8px 3px;
+      padding: 3px 7px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .ts-chip.on {
+      color: #04060c;
+      border-color: var(--cyan);
+      background: linear-gradient(120deg, var(--cyan), #7af3ff);
+      box-shadow: 0 0 10px rgba(34, 227, 255, .35);
+    }
+    .topspeed-box {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .topspeed-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .topspeed-input {
+      width: 72px;
+      padding: 5px 8px;
+      border-radius: 10px 4px 10px 4px;
+      border: 1px solid var(--cyan);
+      background: rgba(3, 6, 14, 0.85);
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
     }
     .hud-sim-bar .sim-grid {
       display: grid;
@@ -380,7 +446,7 @@
         </svg>
         <div class="speed">
           <div class="speed-val" id="speedDisp">0</div>
-          <div class="speed-unit">KM/H  MAX 120</div>
+          <div class="speed-unit" id="btnOpenTopSpeed" style="cursor:pointer" title="Ketuk untuk atur Top Speed">KM/H  MAX <b id="uiMaxSpeed" style="color:var(--cyan)">120</b></div>
         </div>
       </div>
       <div class="hud-state state-idle" id="stateBadge">IDLE STANDBY</div>
@@ -419,6 +485,16 @@
     </section>
 
     <div class="hud-sim-bar" id="hudSimBar">
+      <div class="sim-topspeed-row">
+        <span>TOP SPEED (KM/H)</span>
+        <div class="topspeed-chips">
+          <button type="button" class="ts-chip" data-ts="40">40</button>
+          <button type="button" class="ts-chip" data-ts="60">60</button>
+          <button type="button" class="ts-chip" data-ts="80">80</button>
+          <button type="button" class="ts-chip" data-ts="100">100</button>
+          <button type="button" class="ts-chip on" data-ts="120">120</button>
+        </div>
+      </div>
       <div class="sim-grid">
         <div class="sim-col">
           <div class="sim-lbl"><span>Speed</span><b id="hudSimSpeedVal">0.0 km/h</b></div>
@@ -461,19 +537,32 @@
     </section>
 
     <section class="card" style="--i:1">
-      <h3>SUARA CRUISING</h3>
+      <h3>SUARA CRUISING & TOP SPEED</h3>
       <div class="seg">
         <button class="mode-btn" data-mode="cruise">CRUISING</button>
         <button class="mode-btn" data-mode="accel">AKSELERASI</button>
       </div>
-      <p class="hint">Di atas 40 km/jam suara otomatis berubah ke AKSELERASI.</p>
+      <div class="topspeed-box">
+        <div class="topspeed-head">
+          <span>Top Speed Maksimal (km/jam)</span>
+          <input type="number" id="cfgMaxSpeed" class="topspeed-input" min="20" max="150" step="5" value="120">
+        </div>
+        <div class="topspeed-chips">
+          <button type="button" class="ts-chip" data-ts="40">40 km/h</button>
+          <button type="button" class="ts-chip" data-ts="60">60 km/h</button>
+          <button type="button" class="ts-chip" data-ts="80">80 km/h</button>
+          <button type="button" class="ts-chip" data-ts="100">100 km/h</button>
+          <button type="button" class="ts-chip on" data-ts="120">120 km/h</button>
+        </div>
+      </div>
+      <p class="hint" id="accelHint">Di atas 40 km/jam suara otomatis berubah ke AKSELERASI. Volume & klaster menyesuaikan Top Speed.</p>
     </section>
 
     <section class="card" style="--i:2">
       <h3>SIMULASI</h3>
       <button class="toggle" id="btnTestMode">MODE SIMULASI</button>
       <div class="manual" id="testBox" style="display:none">
-        <div class="row"><span>Kecepatan <b id="manualVal">0</b> km/h</span><span>Kemiringan <b id="tiltVal">0°</b></span></div>
+        <div class="row"><span>Kecepatan <b id="manualVal">0</b> / <b id="manualMaxLbl">120</b> km/h</span><span>Kemiringan <b id="tiltVal">0°</b></span></div>
         <input type="range" id="manualSlider" min="0" max="120" step="0.5" value="0">
         <input type="range" id="manualTilt" min="-25" max="25" step="1" value="0">
       </div>
@@ -497,7 +586,7 @@
     </section>
   </div>
 
-  <div class="dfoot">CYBER EV SOUND SYNTHESIZER, BUILD v3.7.0</div>
+  <div class="dfoot">CYBER EV SOUND SYNTHESIZER, BUILD v3.8.0</div>
 </aside>
 
 <script>
@@ -568,8 +657,8 @@
   let currentAudioFreq = 0, currentFilterFreq = 0, currentEngineState = 'IDLE';
 
   // ===== HANYA 3 SUARA: IDLE, CRUISE (volume naik halus mengikuti kecepatan), ENGINE BRAKE =====
-  // ===== KLASTER CRUISING: nada stabil per rentang kecepatan, hanya volume yang berubah halus =====
-  const CRUISE_BANDS = [
+  // ===== KLASTER CRUISING DASAR (skala 120 km/jam): otomatis diskalakan sesuai Top Speed =====
+  const BASE_CRUISE_BANDS = [
     { min: 10, max: 30, f: 55.00,  v: 0.16 },   // A1
     { min: 30, max: 45, f: 73.42,  v: 0.22 },   // D2
     { min: 45, max: 60, f: 98.00,  v: 0.28 },   // G2
@@ -577,16 +666,17 @@
     { min: 80, max: 100, f: 146.83, v: 0.38 },  // D3
     { min: 100, max: 120, f: 174.61, v: 0.42 }  // F3
   ];
-  const GAUGE_MAX = 120;        // skala gauge (km/jam)
+  let GAUGE_MAX = 120;          // skala Top Speed & gauge (km/jam), dapat diatur 20 - 150
   const MAX_SPEED_KMH = 150;    // batas aman pembacaan GPS
-  const ACCEL_OVER_KMH = 40;    // di atas ini suara otomatis AKSELERASI
-  const BAND_HYST = 2;          // histeresis batas klaster (km/jam) agar tidak bolak-balik
+  let ACCEL_OVER_KMH = 40;      // di atas ini suara otomatis AKSELERASI (ikut skala Top Speed)
+  let BAND_HYST = 2;            // histeresis batas klaster (km/jam) agar tidak bolak-balik
+  let CRUISE_BANDS = BASE_CRUISE_BANDS.map(b => ({ ...b }));
   // ===== ENGINE BRAKE: penurunan besar DAN cukup lama =====
-  const BRAKE_DROP_KMH = 10;    // total penurunan minimal
+  let BRAKE_DROP_KMH = 10;      // total penurunan minimal (ikut skala Top Speed)
   const BRAKE_MIN_MS = 1500;    // penurunan harus berlangsung minimal 1,5 detik
   const BRAKE_STALL_MS = 800;   // dianggap berhenti turun jika tidak ada titik terendah baru selama 0,8 detik
   const BRAKE_BOUNCE_KMH = 1.5; // naik lagi lebih dari ini => ulang pengukuran
-  const APP_VERSION = '3.7.0';
+  const APP_VERSION = '3.8.0';
   const VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
   const RELEASE_URL = 'https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk';
 
@@ -719,7 +809,7 @@
     const state = detectState(speed, performance.now());
     bandIdx = bandFor(speed);
     const band = CRUISE_BANDS[bandIdx];
-    const inBand = Math.min(Math.max((speed - band.min) / (band.max - band.min), 0), 1);
+    const inBand = Math.min(Math.max((speed - band.min) / Math.max(band.max - band.min, 0.1), 0), 1);
 
     const stateBadge = document.getElementById('stateBadge');
     const gaugeFill = document.getElementById('gaugeFill');
@@ -735,24 +825,25 @@
       stateBadge.innerText = 'IDLE STANDBY';
       gaugeFill.style.stroke = 'var(--cyan)';
     } else if (state === 'CRUISE') {
-      // Nada tetap di klaster ini; hanya volume yang naik-turun halus mengikuti kecepatan
+      // Nada tetap di klaster ini; volume menyesuaikan klaster & proporsi terhadap Top Speed (norm)
       freq = band.f * mp.freq;
       const accelNow = cruiseMode === 'accel' || speed > ACCEL_OVER_KMH;
+      const volBase = 0.16 + norm * 0.34; // 0.16 saat pelan hingga 0.50 penuh saat mencapai Top Speed
       if (accelNow) {
         // Karakter akselerasi: harmonik lebih tinggi, lebih terang, sedikit lebih keras
         harm = mp.harm * 1.33;
-        master = (band.v + inBand * 0.08 + 0.06) * mp.gain;
+        master = ((band.v + inBand * 0.08) * 0.5 + volBase * 0.5 + 0.06) * mp.gain;
         lp = (1200 + bandIdx * 250 + inBand * 200) * mp.lp;
         noise = 0.04 * mp.noise;
       } else {
         harm = mp.harm;
-        master = (band.v + inBand * 0.08) * mp.gain;
+        master = ((band.v + inBand * 0.08) * 0.5 + volBase * 0.5) * mp.gain;
         lp = (500 + bandIdx * 250 + inBand * 200) * mp.lp;
         noise = 0.02 * mp.noise;
       }
-      load = Math.round(45 + norm * 40);
+      load = Math.round(45 + norm * 55);
       stateBadge.classList.add(accelNow ? 'state-accel' : 'state-cruise');
-      stateBadge.innerText = accelNow ? `AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${band.min}-${band.max} KM/H`;
+      stateBadge.innerText = accelNow ? `AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${Math.round(band.min)}-${Math.round(band.max)} KM/H`;
       gaugeFill.style.stroke = accelNow ? 'var(--cyan)' : 'var(--lime)';
     } else {
       freq = band.f * mp.freq * 0.8; master = 0.30 * mp.gain; lp = 260 * mp.lp; noise = 0.10 * mp.noise; load = 25;
@@ -1023,12 +1114,61 @@
   document.getElementById('btnSimQuick').addEventListener('click', toggleSimMode);
 
   function setManualSpeed(val) {
-    targetSpeed = parseFloat(val) || 0;
+    targetSpeed = Math.min(Math.max(parseFloat(val) || 0, 0), GAUGE_MAX);
     document.getElementById('manualVal').innerText = targetSpeed.toFixed(1);
-    document.getElementById('hudSimSpeedVal').innerText = `${targetSpeed.toFixed(1)} km/h`;
+    document.getElementById('hudSimSpeedVal').innerText = `${targetSpeed.toFixed(1)} / ${GAUGE_MAX} km/h`;
     document.getElementById('manualSlider').value = targetSpeed;
     document.getElementById('hudSimSpeed').value = targetSpeed;
   }
+
+  function setMaxSpeed(val) {
+    const parsed = Math.round(parseFloat(val) || 120);
+    GAUGE_MAX = Math.min(Math.max(parsed, 20), 150);
+    const scale = GAUGE_MAX / 120;
+    CRUISE_BANDS = BASE_CRUISE_BANDS.map(b => ({
+      min: Number((b.min * scale).toFixed(1)),
+      max: Number((b.max * scale).toFixed(1)),
+      f: b.f,
+      v: b.v
+    }));
+    ACCEL_OVER_KMH = Math.max(8, Math.round(40 * scale));
+    BAND_HYST = Math.max(0.5, Number((2 * scale).toFixed(1)));
+    BRAKE_DROP_KMH = Math.max(3, Math.round(10 * scale));
+
+    document.getElementById('uiMaxSpeed').innerText = GAUGE_MAX;
+    document.getElementById('manualMaxLbl').innerText = GAUGE_MAX;
+    document.getElementById('cfgMaxSpeed').value = GAUGE_MAX;
+    document.getElementById('manualSlider').max = GAUGE_MAX;
+    document.getElementById('hudSimSpeed').max = GAUGE_MAX;
+    document.getElementById('accelHint').innerText =
+      `Di atas ${ACCEL_OVER_KMH} km/jam suara otomatis berubah ke AKSELERASI. Volume & 6 klaster nada menyesuaikan Top Speed ${GAUGE_MAX} km/jam.`;
+
+    document.querySelectorAll('.ts-chip').forEach(btn => {
+      btn.classList.toggle('on', parseInt(btn.dataset.ts, 10) === GAUGE_MAX);
+    });
+
+    if (isTestMode && targetSpeed > GAUGE_MAX) {
+      setManualSpeed(GAUGE_MAX);
+    } else {
+      document.getElementById('hudSimSpeedVal').innerText = `${targetSpeed.toFixed(1)} / ${GAUGE_MAX} km/h`;
+    }
+
+    try { localStorage.setItem('rmev_max_speed', String(GAUGE_MAX)); } catch (e) {}
+    if (isEngineRunning) updateSound(currentSpeed);
+    renderGraph();
+  }
+
+  document.querySelectorAll('.ts-chip').forEach(btn => {
+    btn.addEventListener('click', () => setMaxSpeed(btn.dataset.ts));
+  });
+  document.getElementById('cfgMaxSpeed').addEventListener('change', (e) => setMaxSpeed(e.target.value));
+  document.getElementById('btnOpenTopSpeed').addEventListener('click', () => {
+    document.getElementById('btnDrawer').click();
+  });
+
+  let savedMaxSpeed = 120;
+  try { savedMaxSpeed = parseInt(localStorage.getItem('rmev_max_speed') || '120', 10) || 120; } catch (e) {}
+  setMaxSpeed(savedMaxSpeed);
 
   function setManualTilt(val) {
     currentPitch = parseFloat(val) || 0;

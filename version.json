@@ -1,5 +1,5 @@
 {
-  "version": "3.8.0",
+  "version": "3.9.0",
   "apk": "https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk",
-  "notes": "Pengaturan Top Speed dinamis (20-150 km/h) yang otomatis menyesuaikan skala 6 klaster nada, volume mesin, slider simulasi, dan grafik telemetri."
+  "notes": "Efek suara realistis saat klik Start Engine (dinamo starter + ignition roar) dan Shutdown Reactor (spool-down dekompresi + klik relay), serta Top Speed dinamis."
 }

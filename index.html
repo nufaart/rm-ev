@@ -586,7 +586,7 @@
     </section>
   </div>
 
-  <div class="dfoot">CYBER EV SOUND SYNTHESIZER, BUILD v3.8.0</div>
+  <div class="dfoot">CYBER EV SOUND SYNTHESIZER, BUILD v3.9.0</div>
 </aside>
 
 <script>
@@ -655,6 +655,9 @@
   let currentPitch = 0, zeroPitchOffset = 0;
   let isTestMode = false;
   let currentAudioFreq = 0, currentFilterFreq = 0, currentEngineState = 'IDLE';
+  let startupStartMs = 0;
+  const STARTUP_DURATION_MS = 1150;
+  let stopTimerId = null;
 
   // ===== HANYA 3 SUARA: IDLE, CRUISE (volume naik halus mengikuti kecepatan), ENGINE BRAKE =====
   // ===== KLASTER CRUISING DASAR (skala 120 km/jam): otomatis diskalakan sesuai Top Speed =====
@@ -676,7 +679,7 @@
   const BRAKE_MIN_MS = 1500;    // penurunan harus berlangsung minimal 1,5 detik
   const BRAKE_STALL_MS = 800;   // dianggap berhenti turun jika tidak ada titik terendah baru selama 0,8 detik
   const BRAKE_BOUNCE_KMH = 1.5; // naik lagi lebih dari ini => ulang pengukuran
-  const APP_VERSION = '3.8.0';
+  const APP_VERSION = '3.9.0';
   const VERSION_URL = 'https://raw.githubusercontent.com/nufaart/rm-ev/main/version.json';
   const RELEASE_URL = 'https://github.com/nufaart/rm-ev/releases/latest/download/rm-ev.apk';
 
@@ -760,6 +763,111 @@
     noiseNode.start();
   }
 
+  // Efek suara tambahan saat START ENGINE: dinamo starter + fuel pump / inverter prime
+  function playStartSound() {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const mp = motorPreset;
+
+    // 1. Suara fuel-pump / inverter high-tech prime whine (0.0s - 0.36s)
+    const primeOsc = audioCtx.createOscillator();
+    const primeGain = audioCtx.createGain();
+    primeOsc.type = 'triangle';
+    primeOsc.frequency.setValueAtTime(260, t);
+    primeOsc.frequency.exponentialRampToValueAtTime(780, t + 0.32);
+    primeGain.gain.setValueAtTime(0.001, t);
+    primeGain.gain.linearRampToValueAtTime(0.08 * mp.gain, t + 0.05);
+    primeGain.gain.exponentialRampToValueAtTime(0.001, t + 0.36);
+    primeOsc.connect(primeGain);
+    primeGain.connect(audioCtx.destination);
+    primeOsc.start(t);
+    primeOsc.stop(t + 0.37);
+
+    // 2. Suara 3 hentakan dinamo starter kompresi sebelum mesin menyala
+    const crankOsc = audioCtx.createOscillator();
+    const crankFilter = audioCtx.createBiquadFilter();
+    const crankGain = audioCtx.createGain();
+    crankOsc.type = 'sawtooth';
+    crankFilter.type = 'lowpass';
+    crankFilter.frequency.setValueAtTime(420, t);
+    crankGain.gain.setValueAtTime(0.001, t);
+
+    [0.02, 0.12, 0.22].forEach((offset) => {
+      crankOsc.frequency.setValueAtTime(48 * mp.freq, t + offset);
+      crankOsc.frequency.linearRampToValueAtTime(86 * mp.freq, t + offset + 0.07);
+      crankGain.gain.setValueAtTime(0.02 * mp.gain, t + offset);
+      crankGain.gain.linearRampToValueAtTime(0.18 * mp.gain, t + offset + 0.04);
+      crankGain.gain.linearRampToValueAtTime(0.03 * mp.gain, t + offset + 0.09);
+    });
+    crankGain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+    crankOsc.connect(crankFilter);
+    crankFilter.connect(crankGain);
+    crankGain.connect(audioCtx.destination);
+    crankOsc.start(t);
+    crankOsc.stop(t + 0.36);
+  }
+
+  // Efek suara saat SHUTDOWN REACTOR / STOP ENGINE: deselerasi kompresi + spool-down turbin + klik relay
+  function playStopSound() {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const mp = motorPreset;
+    const startFreq = Math.max(currentAudioFreq || (38 * mp.freq), 32 * mp.freq);
+
+    // 1. Turunkan putaran mesin utama secara bertahap (mesin mati perlahan)
+    oscMain.frequency.cancelScheduledValues(t);
+    oscHarmonic.frequency.cancelScheduledValues(t);
+    oscSub.frequency.cancelScheduledValues(t);
+    mainGainNode.gain.cancelScheduledValues(t);
+    filterLowPass.frequency.cancelScheduledValues(t);
+    noiseGain.gain.cancelScheduledValues(t);
+
+    oscMain.frequency.setValueAtTime(startFreq, t);
+    oscMain.frequency.exponentialRampToValueAtTime(Math.max(12, 15 * mp.freq), t + 0.65);
+    oscHarmonic.frequency.setValueAtTime(startFreq * mp.harm, t);
+    oscHarmonic.frequency.exponentialRampToValueAtTime(Math.max(18, 22 * mp.freq), t + 0.65);
+    oscSub.frequency.setValueAtTime(startFreq * 0.5, t);
+    oscSub.frequency.exponentialRampToValueAtTime(8, t + 0.65);
+
+    filterLowPass.frequency.setValueAtTime(Math.max(currentFilterFreq || 300, 280), t);
+    filterLowPass.frequency.exponentialRampToValueAtTime(95, t + 0.62);
+
+    // Desis dekompresi singkat saat klep/reaktor berhenti
+    noiseGain.gain.setValueAtTime(0.05 * mp.noise, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+
+    mainGainNode.gain.setValueAtTime(0.24 * mp.gain, t);
+    mainGainNode.gain.exponentialRampToValueAtTime(0.0001, t + 0.68);
+
+    // 2. Suara turbin/reaktor EV spool-down + klik mekanis relay
+    const downOsc = audioCtx.createOscillator();
+    const downGain = audioCtx.createGain();
+    downOsc.type = 'triangle';
+    downOsc.frequency.setValueAtTime(520, t);
+    downOsc.frequency.exponentialRampToValueAtTime(75, t + 0.62);
+    downGain.gain.setValueAtTime(0.09 * mp.gain, t);
+    downGain.gain.exponentialRampToValueAtTime(0.001, t + 0.64);
+    downOsc.connect(downGain);
+    downGain.connect(audioCtx.destination);
+    downOsc.start(t);
+    downOsc.stop(t + 0.65);
+
+    // Klik relay pemutus arus pada akhir shutdown
+    const clickOsc = audioCtx.createOscillator();
+    const clickGain = audioCtx.createGain();
+    clickOsc.type = 'square';
+    clickOsc.frequency.setValueAtTime(180, t + 0.56);
+    clickOsc.frequency.exponentialRampToValueAtTime(45, t + 0.61);
+    clickGain.gain.setValueAtTime(0.0001, t);
+    clickGain.gain.setValueAtTime(0.12 * mp.gain, t + 0.56);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.62);
+    clickOsc.connect(clickGain);
+    clickGain.connect(audioCtx.destination);
+    clickOsc.start(t);
+    clickOsc.stop(t + 0.63);
+  }
+
   function resetDetector() {
     runPeak = 0; runPeakT = 0; runMin = 0; runMinT = 0;
     brakeLatched = false;
@@ -805,26 +913,72 @@
   function updateSound(speed) {
     if (!audioCtx || !isEngineRunning) return;
     const t = audioCtx.currentTime;
+    const now = performance.now();
     const norm = Math.min(Math.max(speed / GAUGE_MAX, 0), 1);
-    const state = detectState(speed, performance.now());
+    const state = detectState(speed, now);
     bandIdx = bandFor(speed);
     const band = CRUISE_BANDS[bandIdx];
     const inBand = Math.min(Math.max((speed - band.min) / Math.max(band.max - band.min, 0.1), 0), 1);
 
     const stateBadge = document.getElementById('stateBadge');
     const gaugeFill = document.getElementById('gaugeFill');
-    gaugeFill.style.strokeDashoffset = 283 - (norm * 283);
     stateBadge.className = 'hud-state';
 
     let freq, master, lp, noise, load;
     let harm = 1.5;
     const mp = motorPreset;
-    if (state === 'IDLE') {
+    const startupElapsed = now - startupStartMs;
+    const inStartup = startupElapsed >= 0 && startupElapsed < STARTUP_DURATION_MS && speed < 3;
+
+    if (inStartup) {
+      const p = startupElapsed / STARTUP_DURATION_MS;
+      if (p < 0.30) {
+        // Fase 1: Dinamo Starter Cranking
+        freq = (26 + Math.sin(p * 65) * 8) * mp.freq;
+        harm = mp.harm;
+        master = 0.14 * mp.gain;
+        lp = 340 * mp.lp;
+        noise = 0.03 * mp.noise;
+        load = 35;
+        stateBadge.classList.add('state-accel');
+        stateBadge.innerText = 'STARTER CRANK';
+        gaugeFill.style.stroke = 'var(--cyan)';
+        gaugeFill.style.strokeDashoffset = 283 - (p * 0.25 * 283);
+      } else if (p < 0.68) {
+        // Fase 2: Ignition Roar / Blip Gas Awal
+        const flare = Math.sin(((p - 0.30) / 0.38) * Math.PI);
+        freq = (40 + flare * 88) * mp.freq;
+        harm = mp.harm * 1.28;
+        master = (0.18 + flare * 0.32) * mp.gain;
+        lp = (450 + flare * 1650) * mp.lp;
+        noise = (0.02 + flare * 0.07) * mp.noise;
+        load = Math.round(35 + flare * 55);
+        stateBadge.classList.add('state-accel');
+        stateBadge.innerText = 'IGNITION ROAR';
+        gaugeFill.style.stroke = 'var(--lime)';
+        gaugeFill.style.strokeDashoffset = 283 - (flare * 0.38 * 283);
+      } else {
+        // Fase 3: Turun halus ke lansam (Idle)
+        const settle = 1 - ((p - 0.68) / 0.32);
+        freq = (38 + settle * 18) * mp.freq;
+        harm = mp.harm;
+        master = (0.10 + settle * 0.10) * mp.gain;
+        lp = (260 + settle * 260) * mp.lp;
+        noise = 0.015 * mp.noise;
+        load = Math.round(20 + settle * 15);
+        stateBadge.classList.add('state-idle');
+        stateBadge.innerText = 'IDLE STANDBY';
+        gaugeFill.style.stroke = 'var(--cyan)';
+        gaugeFill.style.strokeDashoffset = 283 - (settle * 0.08 * 283);
+      }
+    } else if (state === 'IDLE') {
+      gaugeFill.style.strokeDashoffset = 283 - (norm * 283);
       freq = 38 * mp.freq; master = 0.10 * mp.gain; lp = 260 * mp.lp; noise = 0.01 * mp.noise; load = 20;
       stateBadge.classList.add('state-idle');
       stateBadge.innerText = 'IDLE STANDBY';
       gaugeFill.style.stroke = 'var(--cyan)';
     } else if (state === 'CRUISE') {
+      gaugeFill.style.strokeDashoffset = 283 - (norm * 283);
       // Nada tetap di klaster ini; volume menyesuaikan klaster & proporsi terhadap Top Speed (norm)
       freq = band.f * mp.freq;
       const accelNow = cruiseMode === 'accel' || speed > ACCEL_OVER_KMH;
@@ -846,6 +1000,7 @@
       stateBadge.innerText = accelNow ? `AKSELERASI ${Math.round(speed)} KM/H` : `CRUISING ${Math.round(band.min)}-${Math.round(band.max)} KM/H`;
       gaugeFill.style.stroke = accelNow ? 'var(--cyan)' : 'var(--lime)';
     } else {
+      gaugeFill.style.strokeDashoffset = 283 - (norm * 283);
       freq = band.f * mp.freq * 0.8; master = 0.30 * mp.gain; lp = 260 * mp.lp; noise = 0.10 * mp.noise; load = 25;
       stateBadge.classList.add('state-enginebrake');
       stateBadge.innerText = 'ENGINE BRAKE';
@@ -854,14 +1009,15 @@
 
     currentAudioFreq = freq;
     currentFilterFreq = lp;
-    currentEngineState = state;
+    currentEngineState = inStartup ? 'IGNITION' : state;
 
-    oscMain.frequency.setTargetAtTime(freq, t, 0.35);
-    oscHarmonic.frequency.setTargetAtTime(freq * harm, t, 0.35);
-    oscSub.frequency.setTargetAtTime(freq * 0.5, t, 0.35);
-    mainGainNode.gain.setTargetAtTime(master, t, 0.4);
-    filterLowPass.frequency.setTargetAtTime(lp, t, 0.3);
-    noiseGain.gain.setTargetAtTime(noise, t, 0.2);
+    const tc = inStartup ? 0.045 : 0.35;
+    oscMain.frequency.setTargetAtTime(freq, t, tc);
+    oscHarmonic.frequency.setTargetAtTime(freq * harm, t, tc);
+    oscSub.frequency.setTargetAtTime(freq * 0.5, t, tc);
+    mainGainNode.gain.setTargetAtTime(master, t, inStartup ? 0.05 : 0.4);
+    filterLowPass.frequency.setTargetAtTime(lp, t, inStartup ? 0.05 : 0.3);
+    noiseGain.gain.setTargetAtTime(noise, t, inStartup ? 0.04 : 0.2);
 
     document.getElementById('loadDisp').innerText = `${load}%`;
     document.getElementById('metricFreq').innerText = `${Math.round(freq)} Hz`;
@@ -1059,9 +1215,12 @@
   const btnEngine = document.getElementById('btnEngine');
   btnEngine.addEventListener('click', () => {
     if (!isEngineRunning) {
+      if (stopTimerId) { clearTimeout(stopTimerId); stopTimerId = null; }
       if (!audioCtx) initAudio();
       audioCtx.resume();
       isEngineRunning = true;
+      startupStartMs = performance.now();
+      playStartSound();
       resetDetector();
       btnEngine.innerText = 'SHUTDOWN REACTOR';
       btnEngine.classList.add('active');
@@ -1081,23 +1240,35 @@
     } else {
       isEngineRunning = false;
       if (bgTimerId) { clearInterval(bgTimerId); bgTimerId = null; }
-      if (audioCtx) audioCtx.suspend();
+      if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
       const keep = nativePlugin('KeepAlive');
       if (keep) keep.stop().catch(() => {});
       btnEngine.innerText = 'START ENGINE';
       btnEngine.classList.remove('active');
-      currentAudioFreq = 0;
-      currentFilterFreq = 0;
-      currentEngineState = 'IDLE';
       document.getElementById('speedDisp').innerText = '0';
       document.getElementById('metricSpeed').innerText = '0.0 km/h';
-      document.getElementById('metricFreq').innerText = '0 Hz';
-      document.getElementById('metricFilter').innerText = '0 Hz';
-      document.getElementById('loadDisp').innerText = '0%';
       document.getElementById('gaugeFill').style.strokeDashoffset = 283;
-      document.getElementById('stateBadge').className = 'hud-state state-idle';
-      document.getElementById('stateBadge').innerText = 'STANDBY';
-      if (watchId) navigator.geolocation.clearWatch(watchId);
+      document.getElementById('stateBadge').className = 'hud-state state-enginebrake';
+      document.getElementById('stateBadge').innerText = 'SHUTTING DOWN';
+
+      if (audioCtx) {
+        playStopSound();
+        if (stopTimerId) clearTimeout(stopTimerId);
+        stopTimerId = setTimeout(() => {
+          if (!isEngineRunning) {
+            if (audioCtx) audioCtx.suspend();
+            currentAudioFreq = 0;
+            currentFilterFreq = 0;
+            currentEngineState = 'IDLE';
+            document.getElementById('metricFreq').innerText = '0 Hz';
+            document.getElementById('metricFilter').innerText = '0 Hz';
+            document.getElementById('loadDisp').innerText = '0%';
+            document.getElementById('stateBadge').className = 'hud-state state-idle';
+            document.getElementById('stateBadge').innerText = 'STANDBY';
+          }
+          stopTimerId = null;
+        }, 720);
+      }
     }
   });
 
